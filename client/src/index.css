@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(210, 40%, 98%);
+  --foreground: hsl(210, 40%, 15%);
+  --card: hsl(210, 40%, 100%);
+  --card-foreground: hsl(210, 40%, 15%);
+  --popover: hsl(210, 40%, 100%);
+  --popover-foreground: hsl(210, 40%, 15%);
+  --primary: hsl(200, 98%, 39%);
+  --primary-foreground: hsl(210, 40%, 98%);
+  --secondary: hsl(158, 64%, 52%);
+  --secondary-foreground: hsl(210, 40%, 15%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215, 16%, 47%);
+  --accent: hsl(43, 96%, 56%);
+  --accent-foreground: hsl(210, 40%, 15%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --border: hsl(214, 32%, 91%);
+  --input: hsl(214, 32%, 91%);
+  --ring: hsl(200, 98%, 39%);
+  --chart-1: hsl(200, 98%, 39%);
+  --chart-2: hsl(158, 64%, 52%);
+  --chart-3: hsl(43, 96%, 56%);
+  --chart-4: hsl(280, 65%, 60%);
+  --chart-5: hsl(340, 75%, 55%);
+  --sidebar: hsl(210, 40%, 100%);
+  --sidebar-foreground: hsl(210, 40%, 15%);
+  --sidebar-primary: hsl(200, 98%, 39%);
+  --sidebar-primary-foreground: hsl(210, 40%, 98%);
+  --sidebar-accent: hsl(214, 32%, 91%);
+  --sidebar-accent-foreground: hsl(200, 98%, 39%);
+  --sidebar-border: hsl(214, 32%, 91%);
+  --sidebar-ring: hsl(200, 98%, 39%);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 1px 2px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 1px 2px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 2px 4px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 4px 6px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 8px 10px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
+  --tracking-normal: 0em;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(200, 6.67%, 91.18%);
+  --card: hsl(228, 9.8%, 10%);
+  --card-foreground: hsl(0, 0%, 85.1%);
+  --popover: hsl(0, 0%, 0%);
+  --popover-foreground: hsl(200, 6.67%, 91.18%);
+  --primary: hsl(200, 98%, 39%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(158, 64%, 52%);
+  --secondary-foreground: hsl(210, 40%, 15%);
+  --muted: hsl(0, 0%, 9.41%);
+  --muted-foreground: hsl(210, 3.39%, 46.27%);
+  --accent: hsl(43, 96%, 56%);
+  --accent-foreground: hsl(200, 98%, 39%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 5.26%, 14.9%);
+  --input: hsl(207.69%, 27.66%, 18.43%);
+  --ring: hsl(200, 98%, 39%);
+  --chart-1: hsl(200, 98%, 39%);
+  --chart-2: hsl(158, 64%, 52%);
+  --chart-3: hsl(43, 96%, 56%);
+  --chart-4: hsl(280, 65%, 60%);
+  --chart-5: hsl(340, 75%, 55%);
+  --sidebar: hsl(228, 9.8%, 10%);
+  --sidebar-foreground: hsl(0, 0%, 85.1%);
+  --sidebar-primary: hsl(200, 98%, 39%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(205.71%, 70%, 7.84%);
+  --sidebar-accent-foreground: hsl(200, 98%, 39%);
+  --sidebar-border: hsl(205.71%, 15.79%, 26.08%);
+  --sidebar-ring: hsl(200, 98%, 39%);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+  --shadow-2xs: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 1px 2px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 1px 2px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 2px 4px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 4px 6px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 8px 10px -1px hsl(200, 98%, 39% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+.water-animation {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+  background-size: 200% 200%;
+  animation: flow 3s ease-in-out infinite;
+}
+
+@keyframes flow {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+}
+
+.drop-shadow-custom {
+  filter: drop-shadow(0 10px 8px rgb(0 0 0 / 0.04)) drop-shadow(0 4px 3px rgb(0 0 0 / 0.1));
+}
