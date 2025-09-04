@@ -110,12 +110,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const calculationData = insertWaterCalculationSchema.parse({
         userProfileId: profile.id,
-        monthlyRainfall,
-        runoffCoefficient,
-        monthlyCollection,
-        monthlySavings,
-        annualCollection,
-        annualSavings,
+        monthlyRainfall: monthlyRainfall.toString(),
+        runoffCoefficient: runoffCoefficient.toString(),
+        monthlyCollection: monthlyCollection.toString(),
+        monthlySavings: monthlySavings.toString(),
+        annualCollection: annualCollection.toString(),
+        annualSavings: annualSavings.toString(),
       });
 
       // Check if calculations already exist

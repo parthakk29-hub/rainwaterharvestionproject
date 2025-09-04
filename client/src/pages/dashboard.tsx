@@ -17,6 +17,7 @@ import {
   Briefcase,
   Shield
 } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface UserProfile {
   id: string;
@@ -50,6 +51,7 @@ export default function Dashboard() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const queryClient = useQueryClient();
+  const [, setRoute] = useLocation();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -251,7 +253,23 @@ export default function Dashboard() {
   const maxMonthly = Math.max(...monthlyData.map(d => d.liters));
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Animated Rain Background */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="rain-animation">
+          {[...Array(50)].map((_, i) => (
+            <div 
+              key={i} 
+              className="raindrop" 
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${0.5 + Math.random() * 0.5}s`
+              }}
+            />
+          ))}
+        </div>
+      </div>
       {/* Dashboard Navigation */}
       <nav className="bg-card shadow-sm border-b border-border sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -588,7 +606,11 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-4 justify-center">
-          <Button className="px-6 py-3" data-testid="button-update-roof">
+          <Button 
+            className="px-6 py-3" 
+            data-testid="button-update-roof"
+            onClick={() => setRoute('/rooftop')}
+          >
             Update Roof Area
           </Button>
           <Button 
