@@ -88,8 +88,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const monthlyCollection = monthlyRainfall * rooftopArea * runoffCoefficient * 0.623;
       const annualCollection = monthlyCollection * 12;
       
-      // Estimate savings based on average water cost ($0.004 per gallon, ~$0.0015 per liter)
-      const costPerLiter = 0.0015;
+      // Estimate savings based on average water cost in India (₹0.12 per liter)
+      const costPerLiter = 0.12;
       const monthlySavings = monthlyCollection * costPerLiter;
       const annualSavings = annualCollection * costPerLiter;
 
@@ -260,8 +260,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ["Runoff Coefficient", calculations.runoffCoefficient],
         ["Monthly Collection (liters)", calculations.monthlyCollection],
         ["Annual Collection (liters)", calculations.annualCollection],
-        ["Monthly Savings ($)", calculations.monthlySavings],
-        ["Annual Savings ($)", calculations.annualSavings],
+        ["Monthly Savings (₹)", calculations.monthlySavings],
+        ["Annual Savings (₹)", calculations.annualSavings],
         [""],
         ["Calculation Formula"],
         ["Volume (L) = Rainfall (in) × Roof Area (sq ft) × Runoff Coefficient × 0.623"]
@@ -275,14 +275,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       monthlyData.push(["Monthly Breakdown"]);
       monthlyData.push([""]);
-      monthlyData.push(["Month", "Collection (Liters)", "Savings ($)"]);
+      monthlyData.push(["Month", "Collection (Liters)", "Savings (₹)"]);
       
       let totalAnnual = 0;
       let totalSavings = 0;
       
       months.forEach((month, index) => {
         const monthlyCollection = Math.round(baseCollection * seasonalFactors[index]);
-        const monthlySavings = (monthlyCollection * 0.0015).toFixed(2);
+        const monthlySavings = (monthlyCollection * 0.12).toFixed(2);
         totalAnnual += monthlyCollection;
         totalSavings += parseFloat(monthlySavings);
         monthlyData.push([month, monthlyCollection, monthlySavings]);

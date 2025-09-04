@@ -165,7 +165,7 @@ export default function Landing() {
               <p className="text-muted-foreground">Water Per Month (100m² roof)</p>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-accent mb-2" data-testid="stat-savings">$800</div>
+              <div className="text-4xl font-bold text-accent mb-2" data-testid="stat-savings">₹60,000</div>
               <p className="text-muted-foreground">Annual Savings Potential</p>
             </div>
             <div className="text-center">

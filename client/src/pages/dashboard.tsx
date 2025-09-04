@@ -282,7 +282,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground mb-1" data-testid="text-monthly-savings">
-                ${monthlySavings.toFixed(0)}
+                ₹{monthlySavings.toFixed(0)}
               </div>
               <p className="text-sm text-secondary">Monthly water bill reduction</p>
             </CardContent>
@@ -394,7 +394,7 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-sm text-muted-foreground">Estimated Savings</span>
                     <span className="text-lg font-semibold text-secondary" data-testid="text-annual-savings">
-                      ${annualSavings.toFixed(0)}/year
+                      ₹{annualSavings.toFixed(0)}/year
                     </span>
                   </div>
                 </div>
