@@ -82,10 +82,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Calculate water collection based on rooftop area and rainfall
       const rooftopArea = parseFloat(profile.rooftopArea || "0");
       const monthlyRainfall = parseFloat(req.body.monthlyRainfall || "2.5");
-      const runoffCoefficient = 0.85; // Standard coefficient for most roof materials
+      
+      // Use fallback rooftop area if not provided (average Indian house: 1000 sq ft)
+      const effectiveRooftopArea = rooftopArea > 0 ? rooftopArea : 1000;
+      
+      // Adjust runoff coefficient based on roof type
+      let runoffCoefficient = 0.85; // Default coefficient
+      if (profile.rooftopType) {
+        switch (profile.rooftopType) {
+          case 'metal': runoffCoefficient = 0.95; break;
+          case 'concrete': runoffCoefficient = 0.90; break;
+          case 'tile': runoffCoefficient = 0.80; break;
+          case 'asbestos': runoffCoefficient = 0.85; break;
+          case 'thatched': runoffCoefficient = 0.60; break;
+          default: runoffCoefficient = 0.85;
+        }
+      }
 
       // Formula: Volume (liters) = Rainfall (inches) × Roof Area (sq ft) × Runoff Coefficient × 0.623 (conversion factor)
-      const monthlyCollection = monthlyRainfall * rooftopArea * runoffCoefficient * 0.623;
+      const monthlyCollection = monthlyRainfall * effectiveRooftopArea * runoffCoefficient * 0.623;
       const annualCollection = monthlyCollection * 12;
       
       // Estimate savings based on average water cost in India (₹0.12 per liter)

@@ -180,6 +180,31 @@ export default function Dashboard() {
     }
   };
 
+  // Handle maximize system actions
+  const handleMaximizeAction = (action: 'maintenance' | 'upgrade' | 'incentives') => {
+    const actionInfo = {
+      maintenance: {
+        title: "Maintenance Tips",
+        description: "Regular maintenance ensures optimal water collection:\n\n• Clean gutters and filters monthly\n• Inspect roof for damage after storms\n• Check storage tank for sediment buildup\n• Ensure proper mosquito-proofing\n• Maintain first-flush diverters"
+      },
+      upgrade: {
+        title: "Upgrade Options", 
+        description: "Enhance your rainwater harvesting system:\n\n• Install larger storage capacity tanks\n• Add water filtration systems\n• Include smart monitoring sensors\n• Upgrade to UV sterilization\n• Install automated pumps for distribution"
+      },
+      incentives: {
+        title: "Local Incentives",
+        description: "Available benefits for rainwater harvesting in India:\n\n• Government subsidies up to ₹50,000\n• Property tax rebates (5-10%)\n• Water bill discounts in many cities\n• Fast-track building approvals\n• Carbon credit opportunities"
+      }
+    };
+
+    const info = actionInfo[action];
+    toast({
+      title: info.title,
+      description: info.description,
+      duration: 8000,
+    });
+  };
+
   // Auto-calculate if we have profile but no calculations
   useEffect(() => {
     if (profile && !calculations && !calculationsLoading && weather) {
@@ -528,29 +553,35 @@ export default function Dashboard() {
             <h3 className="text-2xl font-semibold text-foreground mb-6">Maximize Your System</h3>
             
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-xl mx-auto mb-4 flex items-center justify-center">
-                  <Settings className="w-8 h-8 text-primary" />
-                </div>
-                <h4 className="font-semibold text-foreground mb-2">Maintenance Tips</h4>
-                <p className="text-sm text-muted-foreground">Learn how to maintain your system for optimal performance</p>
-              </div>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleMaximizeAction('maintenance')} data-testid="card-maintenance-tips">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-primary/10 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                    <Settings className="w-8 h-8 text-primary" />
+                  </div>
+                  <h4 className="font-semibold text-foreground mb-2">Maintenance Tips</h4>
+                  <p className="text-sm text-muted-foreground">Learn how to maintain your system for optimal performance</p>
+                </CardContent>
+              </Card>
 
-              <div className="text-center">
-                <div className="w-16 h-16 bg-secondary/10 rounded-xl mx-auto mb-4 flex items-center justify-center">
-                  <Briefcase className="w-8 h-8 text-secondary" />
-                </div>
-                <h4 className="font-semibold text-foreground mb-2">Upgrade Options</h4>
-                <p className="text-sm text-muted-foreground">Discover advanced features to increase your collection capacity</p>
-              </div>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleMaximizeAction('upgrade')} data-testid="card-upgrade-options">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-secondary/10 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                    <Briefcase className="w-8 h-8 text-secondary" />
+                  </div>
+                  <h4 className="font-semibold text-foreground mb-2">Upgrade Options</h4>
+                  <p className="text-sm text-muted-foreground">Discover advanced features to increase your collection capacity</p>
+                </CardContent>
+              </Card>
 
-              <div className="text-center">
-                <div className="w-16 h-16 bg-accent/10 rounded-xl mx-auto mb-4 flex items-center justify-center">
-                  <BarChart3 className="w-8 h-8 text-accent" />
-                </div>
-                <h4 className="font-semibold text-foreground mb-2">Local Incentives</h4>
-                <p className="text-sm text-muted-foreground">Find rebates and tax credits available in your area</p>
-              </div>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => handleMaximizeAction('incentives')} data-testid="card-local-incentives">
+                <CardContent className="p-6 text-center">
+                  <div className="w-16 h-16 bg-accent/10 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                    <BarChart3 className="w-8 h-8 text-accent" />
+                  </div>
+                  <h4 className="font-semibold text-foreground mb-2">Local Incentives</h4>
+                  <p className="text-sm text-muted-foreground">Find rebates and tax credits available in your area</p>
+                </CardContent>
+              </Card>
             </div>
           </CardContent>
         </Card>
