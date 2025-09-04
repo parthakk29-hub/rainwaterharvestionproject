@@ -34,7 +34,7 @@ export default function Landing() {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
               Harvest Every Drop.<br />
-              <span className="text-primary">Save Every Dollar.</span>
+              <span className="text-primary">Save Every Rupee.</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
               Discover how rainwater harvesting can reduce your water bills, support sustainability, and provide water security for your home.
