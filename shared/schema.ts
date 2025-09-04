@@ -46,6 +46,7 @@ export const userProfiles = pgTable("user_profiles", {
   rooftopArea: decimal("rooftop_area", { precision: 10, scale: 2 }), // in square feet
   rooftopLength: decimal("rooftop_length", { precision: 8, scale: 2 }),
   rooftopWidth: decimal("rooftop_width", { precision: 8, scale: 2 }),
+  rooftopType: varchar("rooftop_type"), // tile, metal, concrete, etc.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

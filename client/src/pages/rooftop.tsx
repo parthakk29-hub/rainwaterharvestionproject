@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Home } from "lucide-react";
 import { useLocation } from "wouter";
@@ -13,6 +14,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 
 export default function Rooftop() {
   const [name, setName] = useState("");
+  const [rooftopType, setRooftopType] = useState("");
   const [length, setLength] = useState("");
   const [width, setWidth] = useState("");
   const [totalArea, setTotalArea] = useState("");
@@ -44,7 +46,7 @@ export default function Rooftop() {
   }, [length, width]);
 
   const updateRooftopMutation = useMutation({
-    mutationFn: async (rooftopData: { name?: string; rooftopArea: string; rooftopLength?: string; rooftopWidth?: string }) => {
+    mutationFn: async (rooftopData: { name?: string; rooftopType?: string; rooftopArea: string; rooftopLength?: string; rooftopWidth?: string }) => {
       const response = await apiRequest("POST", "/api/profile", rooftopData);
       return response.json();
     },
@@ -95,6 +97,10 @@ export default function Rooftop() {
       rooftopData.name = name.trim();
     }
     
+    if (rooftopType) {
+      rooftopData.rooftopType = rooftopType;
+    }
+    
     if (length && width) {
       rooftopData.rooftopLength = length;
       rooftopData.rooftopWidth = width;
@@ -139,6 +145,23 @@ export default function Rooftop() {
                   className="w-full"
                   data-testid="input-name"
                 />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-foreground mb-2">Roof Type</Label>
+                <Select value={rooftopType} onValueChange={setRooftopType}>
+                  <SelectTrigger className="w-full" data-testid="select-roof-type">
+                    <SelectValue placeholder="Select your roof type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tile">Tile Roof</SelectItem>
+                    <SelectItem value="metal">Metal/Tin Roof</SelectItem>
+                    <SelectItem value="concrete">Concrete/RCC Slab</SelectItem>
+                    <SelectItem value="asbestos">Asbestos Sheets</SelectItem>
+                    <SelectItem value="thatched">Thatched Roof</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
