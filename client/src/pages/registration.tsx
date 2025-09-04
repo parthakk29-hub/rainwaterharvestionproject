@@ -41,7 +41,7 @@ export default function Registration() {
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-xl mx-auto mb-4 flex items-center justify-center">
                 <User className="w-8 h-8 text-primary-foreground" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Welcome to AquaHarvest</h2>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Welcome to Boondh</h2>
               <p className="text-muted-foreground">Sign in to start calculating your rainwater harvesting potential</p>
             </div>
 

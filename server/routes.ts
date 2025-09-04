@@ -245,7 +245,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // User Information Sheet
       const userInfoData = [
-        ["AquaHarvest - Water Collection Report"],
+        ["Boondh - Water Collection Report"],
         [""],
         ["User Information"],
         ["Name", profile.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'N/A'],
@@ -312,7 +312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
       
       // Set response headers
-      const fileName = `AquaHarvest_Report_${(profile.name || 'User').replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      const fileName = `Boondh_Report_${(profile.name || 'User').replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);

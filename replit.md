@@ -1,8 +1,8 @@
-# AquaHarvest - Rainwater Harvesting Calculator
+# Boondh - Rainwater Harvesting Calculator
 
 ## Overview
 
-AquaHarvest is a full-stack web application designed to help users calculate the potential water collection and cost savings from rainwater harvesting systems. The application guides users through a multi-step onboarding process to collect their location and rooftop specifications, then provides personalized calculations and a comprehensive dashboard with water collection insights.
+Boondh is a full-stack web application designed to help users calculate the potential water collection and cost savings from rainwater harvesting systems. The application guides users through a multi-step onboarding process to collect their location and rooftop specifications, then provides personalized calculations and a comprehensive dashboard with water collection insights.
 
 The application features a modern React frontend with TypeScript, a Node.js/Express backend, PostgreSQL database with Drizzle ORM, and integrates with Replit's authentication system for user management.
 

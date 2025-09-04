@@ -14,7 +14,7 @@ export default function Landing() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
                 <Droplets className="w-5 h-5 text-primary-foreground" />
               </div>
-              <h1 className="text-xl font-bold text-foreground">AquaHarvest</h1>
+              <h1 className="text-xl font-bold text-foreground">Boondh</h1>
             </div>
             <a 
               href="/api/login"

@@ -235,7 +235,7 @@ export default function Dashboard() {
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
                 <Droplets className="w-5 h-5 text-primary-foreground" />
               </div>
-              <h1 className="text-xl font-bold text-foreground">AquaHarvest Dashboard</h1>
+              <h1 className="text-xl font-bold text-foreground">Boondh Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium text-muted-foreground" data-testid="text-welcome">
