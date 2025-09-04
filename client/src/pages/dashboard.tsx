@@ -24,6 +24,8 @@ interface UserProfile {
   location: string;
   city: string;
   rooftopArea: string;
+  latitude?: string;
+  longitude?: string;
 }
 
 interface WaterCalculation {
@@ -80,7 +82,18 @@ export default function Dashboard() {
 
   // Fetch weather data
   const { data: weather } = useQuery<WeatherData>({
-    queryKey: ["/api/weather", profile?.city],
+    queryKey: ["/api/weather", profile?.city, profile?.latitude, profile?.longitude],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (profile?.latitude && profile?.longitude) {
+        params.set('lat', profile.latitude);
+        params.set('lon', profile.longitude);
+      }
+      const url = `/api/weather/${profile?.city}${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch weather data');
+      return response.json();
+    },
     enabled: isAuthenticated && !!profile?.city,
     retry: false,
   });
@@ -117,6 +130,55 @@ export default function Dashboard() {
       });
     },
   });
+
+  // Excel download handler
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await fetch('/api/export/excel', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${document.cookie}`, // This will be handled by session
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to download Excel report');
+      }
+      
+      // Get the filename from headers or create default
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'AquaHarvest_Report.xlsx';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/i);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      // Create blob and download
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Download complete",
+        description: "Your Excel report has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "Download failed",
+        description: "Failed to download Excel report. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Auto-calculate if we have profile but no calculations
   useEffect(() => {
@@ -177,7 +239,7 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm font-medium text-muted-foreground" data-testid="text-welcome">
-                Welcome, {profile.name || user?.user?.firstName || "User"}
+                Welcome, {profile.name || (user as any)?.user?.firstName || "User"}
               </span>
               <a 
                 href="/api/logout"
@@ -498,9 +560,14 @@ export default function Dashboard() {
           <Button className="px-6 py-3" data-testid="button-update-roof">
             Update Roof Area
           </Button>
-          <Button variant="secondary" className="px-6 py-3" data-testid="button-download">
+          <Button 
+            variant="secondary" 
+            className="px-6 py-3" 
+            data-testid="button-download"
+            onClick={handleDownloadExcel}
+          >
             <Download className="w-4 h-4 mr-2" />
-            Download Report
+            Download Excel Report
           </Button>
           <Button variant="outline" className="px-6 py-3" data-testid="button-share">
             <Share className="w-4 h-4 mr-2" />
