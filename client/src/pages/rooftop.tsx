@@ -12,6 +12,7 @@ import { useMutation } from "@tanstack/react-query";
 import { isUnauthorizedError } from "@/lib/authUtils";
 
 export default function Rooftop() {
+  const [name, setName] = useState("");
   const [length, setLength] = useState("");
   const [width, setWidth] = useState("");
   const [totalArea, setTotalArea] = useState("");
@@ -43,7 +44,7 @@ export default function Rooftop() {
   }, [length, width]);
 
   const updateRooftopMutation = useMutation({
-    mutationFn: async (rooftopData: { rooftopArea: string; rooftopLength?: string; rooftopWidth?: string }) => {
+    mutationFn: async (rooftopData: { name?: string; rooftopArea: string; rooftopLength?: string; rooftopWidth?: string }) => {
       const response = await apiRequest("POST", "/api/profile", rooftopData);
       return response.json();
     },
@@ -90,6 +91,10 @@ export default function Rooftop() {
 
     const rooftopData: any = { rooftopArea: area };
     
+    if (name.trim()) {
+      rooftopData.name = name.trim();
+    }
+    
     if (length && width) {
       rooftopData.rooftopLength = length;
       rooftopData.rooftopWidth = width;
@@ -124,6 +129,18 @@ export default function Rooftop() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <Label className="text-sm font-medium text-foreground mb-2">Your Name</Label>
+                <Input
+                  type="text"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full"
+                  data-testid="input-name"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-foreground mb-2">Length (ft)</Label>
