@@ -565,6 +565,51 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Water Usage Applications */}
+        <Card className="mb-8">
+          <CardContent className="p-8">
+            <h3 className="text-2xl font-semibold text-foreground mb-6">How You Can Use Your Harvested Water</h3>
+            
+            <div className="grid md:grid-cols-4 gap-6 mb-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                  <Droplets className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h4 className="font-semibold text-foreground mb-2">Drinking Water</h4>
+                <p className="text-sm text-muted-foreground">{Math.round(monthlyCollection * 0.1)} L/month</p>
+                <p className="text-xs text-muted-foreground">After proper filtration</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                  <Home className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+                <h4 className="font-semibold text-foreground mb-2">Bathing</h4>
+                <p className="text-sm text-muted-foreground">{Math.round(monthlyCollection * 0.4)} L/month</p>
+                <p className="text-xs text-muted-foreground">Daily bath needs</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                  <Settings className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                </div>
+                <h4 className="font-semibold text-foreground mb-2">Washing</h4>
+                <p className="text-sm text-muted-foreground">{Math.round(monthlyCollection * 0.3)} L/month</p>
+                <p className="text-xs text-muted-foreground">Clothes & dishes</p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                </div>
+                <h4 className="font-semibold text-foreground mb-2">Gardening</h4>
+                <p className="text-sm text-muted-foreground">{Math.round(monthlyCollection * 0.2)} L/month</p>
+                <p className="text-xs text-muted-foreground">Plant watering</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Educational Resources */}
         <Card className="mb-8">
           <CardContent className="p-8">
