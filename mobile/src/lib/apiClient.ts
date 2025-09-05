@@ -1,5 +1,5 @@
-// Configuration for API requests
-const API_BASE_URL = 'http://localhost:5000'; // Change this to your server URL
+// Configuration for API requests - use local network IP for mobile testing
+const API_BASE_URL = __DEV__ ? 'http://10.0.2.2:5000' : 'https://your-deployed-app.replit.app';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
