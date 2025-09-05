@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Monthly breakdown data
       const monthlyData = [];
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const baseCollection = parseFloat(calculations.monthlyCollection);
+      const baseCollection = parseFloat(calculations.monthlyCollection || "0");
       const seasonalFactors = [0.65, 0.75, 0.85, 0.95, 1.0, 0.9, 0.8, 0.7, 0.8, 0.9, 0.85, 0.7];
       
       monthlyData.push(["Monthly Breakdown"]);
