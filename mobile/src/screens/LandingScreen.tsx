@@ -1,14 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Linking } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Button, Card, Title, Paragraph } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
 
-export default function LandingScreen() {
-  const handleSignIn = () => {
-    // For mobile, we'll need to handle authentication differently
-    // This would typically open a web browser for OAuth
-    const loginUrl = 'http://localhost:5000/api/login';
-    Linking.openURL(loginUrl);
+export default function LandingScreen({ navigation }: any) {
+  const handleGetStarted = () => {
+    navigation.navigate('Registration');
   };
 
   return (
@@ -51,14 +48,14 @@ export default function LandingScreen() {
         <View style={styles.cta}>
           <Button 
             mode="contained" 
-            onPress={handleSignIn}
+            onPress={handleGetStarted}
             style={styles.ctaButton}
             contentStyle={styles.ctaButtonContent}
           >
             Get Started
           </Button>
           <Text style={styles.ctaText}>
-            Sign in to start calculating your rainwater harvesting potential
+            Tap to start calculating your rainwater harvesting potential
           </Text>
         </View>
       </View>
