@@ -189,11 +189,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         weatherData = await response.json();
       }
       
+      // Check if API returned valid data
+      if (!weatherData || !weatherData.main || weatherData.cod !== 200) {
+        throw new Error(`Invalid weather API response: ${weatherData?.message || 'Unknown error'}`);
+      }
+      
       // Get historical/statistical data (this would require a paid plan for real historical data)
       // For now, we'll use current conditions and estimate monthly/annual
       const currentRain = weatherData.rain?.['1h'] || 0; // mm/h
       const humidity = weatherData.main.humidity;
-      const cloudiness = weatherData.clouds.all;
+      const cloudiness = weatherData.clouds?.all || 0;
       
       // Estimate monthly rainfall based on current conditions and humidity
       // This is a simplified calculation - real implementation would use historical data
