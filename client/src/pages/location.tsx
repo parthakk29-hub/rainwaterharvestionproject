@@ -86,9 +86,14 @@ export default function Location() {
           const response = await fetch(
             `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
           );
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
           const data = await response.json();
-          const city = data.city || data.locality || "Unknown City";
-          const locationStr = `${city}, ${data.principalSubdivision || data.countryName}`;
+          const city = data.city || data.locality || data.principalSubdivision || "Unknown City";
+          const locationStr = `${city}, ${data.principalSubdivision || data.countryName || "India"}`;
           
           setLocationText(locationStr);
           updateLocationMutation.mutate({
@@ -99,12 +104,19 @@ export default function Location() {
           });
         } catch (error) {
           console.error("Reverse geocoding failed:", error);
-          const locationStr = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          // Use a fallback coordinate-based location with generic city
+          const locationStr = `Location (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`;
+          const fallbackCity = "Delhi"; // Default city for India
           setLocationText(locationStr);
           updateLocationMutation.mutate({
             location: locationStr,
+            city: fallbackCity,
             latitude,
             longitude,
+          });
+          toast({
+            title: "Location saved",
+            description: "Your coordinates have been saved with a default city.",
           });
         } finally {
           setIsGettingLocation(false);
