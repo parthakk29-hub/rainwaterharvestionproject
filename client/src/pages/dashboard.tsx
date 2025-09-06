@@ -435,6 +435,28 @@ export default function Dashboard() {
                         placeholder="Enter rooftop area"
                       />
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-length">Length (ft)</Label>
+                        <Input
+                          id="settings-length"
+                          type="number"
+                          value={settingsData.rooftopLength}
+                          onChange={(e) => setSettingsData({...settingsData, rooftopLength: e.target.value})}
+                          placeholder="Length"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="settings-width">Width (ft)</Label>
+                        <Input
+                          id="settings-width"
+                          type="number"
+                          value={settingsData.rooftopWidth}
+                          onChange={(e) => setSettingsData({...settingsData, rooftopWidth: e.target.value})}
+                          placeholder="Width"
+                        />
+                      </div>
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="settings-type">Rooftop Type</Label>
                       <Select
@@ -457,6 +479,24 @@ export default function Dashboard() {
                     <div className="flex flex-col space-y-2">
                       <Button
                         className="w-full"
+                        onClick={async () => {
+                          try {
+                            await apiRequest('POST', '/api/profile', settingsData);
+                            toast({
+                              title: "Success",
+                              description: "Settings updated successfully",
+                            });
+                            queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+                            queryClient.invalidateQueries({ queryKey: ["/api/calculations"] });
+                            setIsSettingsOpen(false);
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to update settings",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
                       >
                         Save Changes
                       </Button>
