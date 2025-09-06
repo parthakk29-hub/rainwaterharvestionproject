@@ -236,7 +236,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (weather && profile && !calculations && !calculationsLoading && !createCalculationsMutation.isPending) {
       const rooftopArea = parseFloat(profile.rooftopArea || '0');
-      const monthlyRainfall = parseFloat(weather?.monthlyRainfall || '0');
+      const monthlyRainfall = parseFloat(String(weather?.monthlyRainfall || '0'));
       
       if (rooftopArea > 0 && monthlyRainfall > 0) {
         createCalculationsMutation.mutate({
