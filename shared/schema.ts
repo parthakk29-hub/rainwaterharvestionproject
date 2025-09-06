@@ -58,9 +58,10 @@ export const waterCalculations = pgTable("water_calculations", {
   monthlyRainfall: decimal("monthly_rainfall", { precision: 6, scale: 2 }), // in inches
   runoffCoefficient: decimal("runoff_coefficient", { precision: 3, scale: 2 }), // typically 0.85
   monthlyCollection: decimal("monthly_collection", { precision: 10, scale: 2 }), // in liters
-  monthlySavings: decimal("monthly_savings", { precision: 8, scale: 2 }), // in dollars
+  monthlySavings: decimal("monthly_savings", { precision: 8, scale: 2 }), // in rupees
   annualCollection: decimal("annual_collection", { precision: 10, scale: 2 }),
-  annualSavings: decimal("annual_savings", { precision: 8, scale: 2 }),
+  annualSavings: decimal("annual_savings", { precision: 8, scale: 2 }), // in rupees
+  costRequiredRwh: decimal("cost_required_rwh", { precision: 10, scale: 2 }), // setup cost in rupees
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
