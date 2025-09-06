@@ -1106,34 +1106,26 @@ export default function Dashboard() {
                 </div>
 
                 {/* Incentives */}
-                {showIncentives && (
-                <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50 animate-in slide-in-from-top-4 duration-300">
+                <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
                   <div className="flex items-center space-x-2 mb-3">
                     <span className="text-2xl">🎁</span>
                     <h4 className="font-semibold text-blue-800 dark:text-blue-200">Incentives</h4>
                   </div>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-700 dark:text-blue-300">Government Subsidy:</span>
-                      <span className="font-semibold px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                        ₹15,000 Available 💰
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-700 dark:text-blue-300">Tax Benefits:</span>
-                      <span className="font-semibold px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                        20% Deduction 📊
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-blue-700 dark:text-blue-300">Water Board Rebate:</span>
-                      <span className="font-semibold px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                        ₹5,000 Cashback 🎯
-                      </span>
-                    </div>
-                  </div>
-                  </div>
-                )}
+                  <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                    <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Government Incentive", description: "Apply for government subsidies up to ₹15,000 for rainwater harvesting systems." })}>
+                      <span className="text-blue-500">•</span>
+                      <span>Government Subsidy - ₹15,000 Available</span>
+                    </li>
+                    <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Tax Benefits", description: "Get 20% tax deduction on rainwater harvesting system installation costs." })}>
+                      <span className="text-blue-500">•</span>
+                      <span>Tax Benefits - 20% Deduction</span>
+                    </li>
+                    <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Water Board Rebate", description: "Receive ₹5,000 cashback from your local water board for sustainable practices." })}>
+                      <span className="text-blue-500">•</span>
+                      <span>Water Board Rebate - ₹5,000 Cashback</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
 
