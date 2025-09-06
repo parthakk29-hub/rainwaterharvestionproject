@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertUserProfileSchema, insertWaterCalculationSchema, insertNotificationSchema } from "@shared/schema";
+import { insertUserProfileSchema, insertWaterCalculationSchema, insertNotificationSchema, type User, type UserProfile, type WaterCalculation } from "@shared/schema";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 
@@ -639,6 +639,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error marking notification as read:", error);
       res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  // Admin-only routes for author access
+  const isAuthor = (req: any, res: any, next: any) => {
+    if (!req.user || !req.user.claims) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    // Check if user is the author (you can replace this with your actual author email/ID)
+    const authorEmail = "niravkumarbhargav@gmail.com"; // Replace with actual author email
+    const userEmail = req.user.claims.email;
+    
+    if (userEmail !== authorEmail) {
+      return res.status(403).json({ message: "Access denied - Author only" });
+    }
+    
+    next();
+  };
+
+  app.get('/api/admin/export/users', isAuthenticated, isAuthor, async (req: any, res) => {
+    try {
+      // Get all users and their profiles
+      const users = await storage.getAllUsers();
+      const profiles = await storage.getAllUserProfiles();
+      const calculations = await storage.getAllCalculations();
+      
+      // Prepare data for Excel export
+      const exportData = users.map((user: User) => {
+        const profile = profiles.find((p: UserProfile) => p.userId === user.id);
+        const calculation = calculations.find((c: WaterCalculation) => c.userProfileId === profile?.id);
+        
+        return {
+          'User ID': user.id,
+          'Email': user.email,
+          'First Name': user.firstName || '',
+          'Last Name': user.lastName || '',
+          'Location': profile?.location || '',
+          'City': profile?.city || '',
+          'State': profile?.state || '',
+          'Latitude': profile?.latitude || '',
+          'Longitude': profile?.longitude || '',
+          'Rooftop Area (sq ft)': profile?.rooftopArea || '',
+          'Rooftop Length': profile?.rooftopLength || '',
+          'Rooftop Width': profile?.rooftopWidth || '',
+          'Rooftop Type': profile?.rooftopType || '',
+          'Monthly Collection (L)': calculation?.monthlyCollection || '',
+          'Annual Collection (L)': calculation?.annualCollection || '',
+          'Monthly Savings (₹)': calculation?.monthlySavings || '',
+          'Annual Savings (₹)': calculation?.annualSavings || '',
+          'Created At': user.createdAt?.toISOString().split('T')[0] || '',
+        };
+      });
+
+      // Create Excel workbook
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      
+      // Auto-size columns
+      const colWidths = Object.keys(exportData[0] || {}).map(key => ({
+        wch: Math.max(key.length, 15)
+      }));
+      ws['!cols'] = colWidths;
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'User Data');
+      
+      // Generate buffer
+      const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+      
+      // Set headers for file download
+      const timestamp = new Date().toISOString().split('T')[0];
+      res.setHeader('Content-Disposition', `attachment; filename="boondh-users-${timestamp}.xlsx"`);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      
+      res.send(buffer);
+    } catch (error) {
+      console.error("Error exporting users:", error);
+      res.status(500).json({ message: "Failed to export user data" });
     }
   });
 

@@ -43,6 +43,11 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   markNotificationAsRead(notificationId: string): Promise<Notification>;
   getUnreadNotificationCount(userId: string): Promise<number>;
+  
+  // Admin operations for data export
+  getAllUsers(): Promise<User[]>;
+  getAllUserProfiles(): Promise<UserProfile[]>;
+  getAllCalculations(): Promise<WaterCalculation[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -183,6 +188,22 @@ export class DatabaseStorage implements IStorage {
       .from(notifications)
       .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
     return result.count;
+  }
+
+  // Admin operations for data export
+  async getAllUsers(): Promise<User[]> {
+    const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+    return allUsers;
+  }
+
+  async getAllUserProfiles(): Promise<UserProfile[]> {
+    const allProfiles = await db.select().from(userProfiles).orderBy(desc(userProfiles.createdAt));
+    return allProfiles;
+  }
+
+  async getAllCalculations(): Promise<WaterCalculation[]> {
+    const allCalculations = await db.select().from(waterCalculations).orderBy(desc(waterCalculations.createdAt));
+    return allCalculations;
   }
 }
 
