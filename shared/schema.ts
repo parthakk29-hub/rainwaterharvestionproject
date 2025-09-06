@@ -64,6 +64,18 @@ export const waterCalculations = pgTable("water_calculations", {
   annualCollection: decimal("annual_collection", { precision: 10, scale: 2 }),
   annualSavings: decimal("annual_savings", { precision: 8, scale: 2 }), // in rupees
   costRequiredRwh: decimal("cost_required_rwh", { precision: 10, scale: 2 }), // setup cost in rupees
+  // Efficiency features
+  governmentIncentives: decimal("government_incentives", { precision: 10, scale: 2 }), // in rupees
+  subsidyAmount: decimal("subsidy_amount", { precision: 10, scale: 2 }), // in rupees
+  taxBenefits: decimal("tax_benefits", { precision: 10, scale: 2 }), // in rupees
+  annualMaintenanceCost: decimal("annual_maintenance_cost", { precision: 8, scale: 2 }), // in rupees
+  filterReplacementCost: decimal("filter_replacement_cost", { precision: 6, scale: 2 }), // in rupees
+  systemInspectionCost: decimal("system_inspection_cost", { precision: 6, scale: 2 }), // in rupees
+  upgradationCost: decimal("upgradation_cost", { precision: 10, scale: 2 }), // in rupees
+  capacityExpansionCost: decimal("capacity_expansion_cost", { precision: 10, scale: 2 }), // in rupees
+  efficiencyImprovementCost: decimal("efficiency_improvement_cost", { precision: 10, scale: 2 }), // in rupees
+  paybackPeriod: decimal("payback_period", { precision: 4, scale: 1 }), // in years
+  roi: decimal("roi", { precision: 5, scale: 2 }), // return on investment percentage
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
