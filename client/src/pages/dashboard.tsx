@@ -69,6 +69,17 @@ interface WaterCalculation {
   annualCollection: string;
   annualSavings: string;
   costRequiredRwh?: string;
+  governmentIncentives?: string;
+  subsidyAmount?: string;
+  taxBenefits?: string;
+  annualMaintenanceCost?: string;
+  filterReplacementCost?: string;
+  systemInspectionCost?: string;
+  upgradationCost?: string;
+  capacityExpansionCost?: string;
+  efficiencyImprovementCost?: string;
+  paybackPeriod?: string;
+  roi?: string;
 }
 
 interface WeatherData {
@@ -876,6 +887,161 @@ export default function Dashboard() {
                     {annualCollection > 10000 ? '🟢 Super!' :
                      annualCollection > 5000 ? '🟡 Good' : '🔴 Okay'}
                   </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Financial Efficiency & Analytics */}
+        <Card className="mb-8 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-950/50 dark:to-emerald-900/50 border-green-200 dark:border-green-800">
+          <CardContent className="p-8">
+            <h3 className="text-2xl font-semibold text-green-800 dark:text-green-200 mb-6 flex items-center space-x-2">
+              <div className="text-2xl">💰</div>
+              <span>Financial Efficiency & ROI</span>
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* ROI Card */}
+              <Card className="bg-white/70 dark:bg-gray-900/50 border-green-200/50 dark:border-green-700/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-green-800 dark:text-green-200">ROI</h4>
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300" data-testid="text-roi">
+                    {calculations?.roi ? `${parseFloat(calculations.roi).toFixed(1)}%` : 'N/A'}
+                  </div>
+                  <p className="text-sm text-green-600 dark:text-green-400">Return on Investment</p>
+                </CardContent>
+              </Card>
+
+              {/* Payback Period Card */}
+              <Card className="bg-white/70 dark:bg-gray-900/50 border-green-200/50 dark:border-green-700/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-green-800 dark:text-green-200">Payback</h4>
+                    <Calendar className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300" data-testid="text-payback-period">
+                    {calculations?.paybackPeriod ? `${parseFloat(calculations.paybackPeriod).toFixed(1)} yrs` : 'N/A'}
+                  </div>
+                  <p className="text-sm text-green-600 dark:text-green-400">Investment Recovery Time</p>
+                </CardContent>
+              </Card>
+
+              {/* Government Incentives Card */}
+              <Card className="bg-white/70 dark:bg-gray-900/50 border-green-200/50 dark:border-green-700/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-green-800 dark:text-green-200">Incentives</h4>
+                    <Target className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300" data-testid="text-incentives">
+                    ₹{calculations?.governmentIncentives ? (parseFloat(calculations.governmentIncentives) / 1000).toFixed(0) : '0'}k
+                  </div>
+                  <p className="text-sm text-green-600 dark:text-green-400">Total Benefits Available</p>
+                </CardContent>
+              </Card>
+
+              {/* Annual Maintenance Card */}
+              <Card className="bg-white/70 dark:bg-gray-900/50 border-green-200/50 dark:border-green-700/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-green-800 dark:text-green-200">Maintenance</h4>
+                    <Settings className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300" data-testid="text-maintenance-cost">
+                    ₹{calculations?.annualMaintenanceCost ? (parseFloat(calculations.annualMaintenanceCost) / 1000).toFixed(1) : '0'}k
+                  </div>
+                  <p className="text-sm text-green-600 dark:text-green-400">Annual Upkeep Cost</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Breakdown */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Incentives Breakdown */}
+              <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-6 border border-green-200/50 dark:border-green-700/50">
+                <div className="flex items-center space-x-2 mb-4">
+                  <span className="text-2xl">🎯</span>
+                  <h4 className="font-semibold text-green-800 dark:text-green-200">Available Incentives</h4>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">Government Subsidy</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.subsidyAmount ? (parseFloat(calculations.subsidyAmount) / 1000).toFixed(0) : '0'}k
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">Tax Benefits</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.taxBenefits ? (parseFloat(calculations.taxBenefits) / 1000).toFixed(0) : '0'}k
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">Total Incentives</span>
+                    <span className="font-bold text-green-800 dark:text-green-200">
+                      ₹{calculations?.governmentIncentives ? (parseFloat(calculations.governmentIncentives) / 1000).toFixed(0) : '0'}k
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Maintenance Breakdown */}
+              <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-6 border border-green-200/50 dark:border-green-700/50">
+                <div className="flex items-center space-x-2 mb-4">
+                  <span className="text-2xl">🔧</span>
+                  <h4 className="font-semibold text-green-800 dark:text-green-200">Annual Maintenance</h4>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">Filter Replacement</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.filterReplacementCost ? (parseFloat(calculations.filterReplacementCost) / 1000).toFixed(1) : '2.0'}k
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">System Inspection</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.systemInspectionCost ? (parseFloat(calculations.systemInspectionCost) / 1000).toFixed(1) : '1.5'}k
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">General Maintenance</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.annualMaintenanceCost ? ((parseFloat(calculations.annualMaintenanceCost) - parseFloat(calculations.filterReplacementCost || '2000') - parseFloat(calculations.systemInspectionCost || '1500')) / 1000).toFixed(1) : '1.5'}k
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Upgradation Options */}
+              <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-6 border border-green-200/50 dark:border-green-700/50">
+                <div className="flex items-center space-x-2 mb-4">
+                  <span className="text-2xl">⚡</span>
+                  <h4 className="font-semibold text-green-800 dark:text-green-200">Upgrade Options</h4>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">Capacity Expansion</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.capacityExpansionCost ? (parseFloat(calculations.capacityExpansionCost) / 1000).toFixed(0) : '0'}k
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">Efficiency Improvement</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.efficiencyImprovementCost ? (parseFloat(calculations.efficiencyImprovementCost) / 1000).toFixed(0) : '0'}k
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-green-700 dark:text-green-300">Complete Upgrade</span>
+                    <span className="font-medium text-green-800 dark:text-green-200">
+                      ₹{calculations?.upgradationCost ? (parseFloat(calculations.upgradationCost) / 1000).toFixed(0) : '0'}k
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
