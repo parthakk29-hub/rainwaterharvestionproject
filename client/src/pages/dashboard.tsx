@@ -323,7 +323,7 @@ export default function Dashboard() {
   const annualCollection = parseFloat(calculations?.annualCollection || "0");
   const annualSavings = parseFloat(calculations?.annualSavings || "0");
   const rooftopArea = parseFloat(profile.rooftopArea || "0");
-  const costRequiredRwh = parseFloat(calculations?.costRequiredRwh || "50000");
+  const costRequiredRwh = parseFloat(calculations?.costRequiredRwh || "0");
 
   // Generate monthly data for visualization
   const monthNames = [
@@ -630,7 +630,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-2xl font-bold text-foreground mb-1" data-testid="text-setup-cost">
-                ₹{(costRequiredRwh / 1000).toFixed(0)}k
+                ₹{costRequiredRwh > 0 ? (costRequiredRwh / 1000).toFixed(0) : (rooftopArea * 2.5 / 1000).toFixed(0)}k
               </div>
               <p className="text-sm text-muted-foreground">RWH system investment</p>
             </CardContent>
@@ -1052,20 +1052,10 @@ export default function Dashboard() {
         <Card className="mb-8 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 border-blue-200 dark:border-blue-800">
           <CardContent className="p-8">
             <div className="flex items-center justify-between mb-6">
-              <button 
-                className="text-2xl font-semibold text-blue-800 dark:text-blue-200 flex items-center space-x-2 hover:text-blue-600 dark:hover:text-blue-300 transition-colors cursor-pointer group"
-                data-testid="button-maximize-system"
-                onClick={() => {
-                  setShowIncentives(!showIncentives);
-                  toast({
-                    title: showIncentives ? "Incentives Hidden" : "Incentives Revealed",
-                    description: showIncentives ? "Click again to view incentives" : "Discover available incentives and benefits!",
-                  });
-                }}
-              >
-                <div className="text-2xl group-hover:scale-110 transition-transform">🚀</div>
-                <span className="group-hover:underline">Maximize Your System</span>
-              </button>
+              <div className="text-2xl font-semibold text-blue-800 dark:text-blue-200 flex items-center space-x-2">
+                <div className="text-2xl">🚀</div>
+                <span>Maximize Your System</span>
+              </div>
               <div className="text-4xl">⚡</div>
             </div>
             
