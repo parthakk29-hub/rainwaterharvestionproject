@@ -36,10 +36,12 @@ export default function Location() {
 
   const updateLocationMutation = useMutation({
     mutationFn: async (locationData: { location: string; city?: string; latitude?: number; longitude?: number }) => {
+      console.log("Submitting location data:", locationData);
       const response = await apiRequest("POST", "/api/profile", locationData);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Location saved successfully:", data);
       toast({
         title: "Location saved",
         description: "Your location has been saved successfully.",
@@ -47,6 +49,7 @@ export default function Location() {
       setRoute("/rooftop");
     },
     onError: (error) => {
+      console.error("Location submission error:", error);
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -150,12 +153,29 @@ export default function Location() {
       return;
     }
 
-    // Extract city from location string (simplified)
-    const parts = location.split(",");
-    const city = parts[0]?.trim() || location.trim();
+    // Extract city from location string with better parsing
+    const locationStr = location.trim();
+    const parts = locationStr.split(",").map(part => part.trim());
+    
+    // Try to get the most relevant city name
+    let city = parts[0] || locationStr;
+    
+    // If it looks like a full address, try to get the city (usually the last or second-to-last part)
+    if (parts.length > 2) {
+      // For format like "123 Street, City, State" - take the second part
+      city = parts[1] || parts[0];
+    } else if (parts.length === 2) {
+      // For format like "City, State" - take the first part
+      city = parts[0];
+    }
+    
+    // Clean up common city prefixes/suffixes
+    city = city.replace(/^(city of |town of |district |dt\.|dist\.)/i, '').trim();
+    
+    console.log(`Extracted city "${city}" from location "${locationStr}"`);
 
     updateLocationMutation.mutate({
-      location: location.trim(),
+      location: locationStr,
       city,
     });
   };

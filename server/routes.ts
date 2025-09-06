@@ -191,7 +191,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if API returned valid data
       if (!weatherData || !weatherData.main || weatherData.cod !== 200) {
-        throw new Error(`Invalid weather API response: ${weatherData?.message || 'Unknown error'}`);
+        console.warn(`Weather API failed for city: ${city}, error: ${weatherData?.message || 'Unknown error'}`);
+        
+        // Try with a few common Indian cities as fallback
+        const fallbackCities = ['Delhi', 'Mumbai', 'Bangalore', 'Chennai', 'Kolkata'];
+        let fallbackData = null;
+        
+        for (const fallbackCity of fallbackCities) {
+          try {
+            const fallbackResponse = await fetch(
+              `https://api.openweathermap.org/data/2.5/weather?q=${fallbackCity}&appid=${process.env.OPENWEATHER_API_KEY}&units=imperial`
+            );
+            fallbackData = await fallbackResponse.json();
+            if (fallbackData && fallbackData.main && fallbackData.cod === 200) {
+              console.log(`Using fallback city: ${fallbackCity} for ${city}`);
+              weatherData = fallbackData;
+              break;
+            }
+          } catch (fallbackError) {
+            console.warn(`Fallback city ${fallbackCity} also failed:`, fallbackError);
+          }
+        }
+        
+        if (!fallbackData || !weatherData.main) {
+          throw new Error(`Invalid weather API response: city not found`);
+        }
       }
       
       // Get historical/statistical data (this would require a paid plan for real historical data)
