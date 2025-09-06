@@ -364,18 +364,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Try to fetch fresh data from API if we have location
+      // Get coordinates from city if not available directly
+      let lat, lng;
       if (profile.latitude && profile.longitude) {
+        lat = parseFloat(profile.latitude);
+        lng = parseFloat(profile.longitude);
+      } else if (profile.city) {
+        // Use city-based coordinates for major Indian cities
+        const cityCoordinates = getCityCoordinates(profile.city);
+        if (cityCoordinates) {
+          lat = cityCoordinates.lat;
+          lng = cityCoordinates.lng;
+        }
+      }
+      
+      // Try to fetch fresh data from API if we have coordinates
+      if (lat && lng) {
         try {
-          const lat = parseFloat(profile.latitude);
-          const lng = parseFloat(profile.longitude);
-          
           const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,wind_speed_10m_max&timezone=auto&forecast_days=7`;
           
+          console.log(`Fetching weather data from: ${weatherUrl}`);
           const response = await fetch(weatherUrl);
           const weatherData = await response.json();
           
           if (response.ok && weatherData.daily) {
+            console.log('Successfully fetched weather data', weatherData.daily);
             // Process and classify rain data
             const freshForecasts = weatherData.daily.time.map((date: string, index: number) => {
               const precipitation = weatherData.daily.precipitation_sum[index] || 0;
@@ -398,10 +411,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Store fresh forecasts in database
             await storage.updateWeatherForecasts(userProfileId, freshForecasts);
             forecasts = freshForecasts;
+            console.log(`Stored ${freshForecasts.length} weather forecasts`);
+          } else {
+            console.error('Weather API response not ok:', response.status, weatherData);
           }
         } catch (apiError) {
           console.warn("API fetch failed, using cached data:", apiError);
         }
+      } else {
+        console.log('No coordinates available for weather fetch');
       }
 
       // Return whatever forecast data we have (fresh or cached)
@@ -411,6 +429,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch weather data" });
     }
   });
+
+  // Helper function to get coordinates for major Indian cities
+  function getCityCoordinates(city: string): { lat: number; lng: number } | null {
+    const cityMap: { [key: string]: { lat: number; lng: number } } = {
+      'Delhi': { lat: 28.7041, lng: 77.1025 },
+      'Mumbai': { lat: 19.0760, lng: 72.8777 },
+      'Bangalore': { lat: 12.9716, lng: 77.5946 },
+      'Bengaluru': { lat: 12.9716, lng: 77.5946 },
+      'Chennai': { lat: 13.0827, lng: 80.2707 },
+      'Kolkata': { lat: 22.5726, lng: 88.3639 },
+      'Hyderabad': { lat: 17.3850, lng: 78.4867 },
+      'Pune': { lat: 18.5204, lng: 73.8567 },
+      'Ahmedabad': { lat: 23.0225, lng: 72.5714 },
+      'Jaipur': { lat: 26.9124, lng: 75.7873 },
+      'Lucknow': { lat: 26.8467, lng: 80.9462 },
+      'Kanpur': { lat: 26.4499, lng: 80.3319 },
+      'Nagpur': { lat: 21.1458, lng: 79.0882 },
+      'Indore': { lat: 22.7196, lng: 75.8577 },
+      'Thane': { lat: 19.2183, lng: 72.9781 },
+      'Bhopal': { lat: 23.2599, lng: 77.4126 },
+      'Visakhapatnam': { lat: 17.6868, lng: 83.2185 },
+      'Pimpri-Chinchwad': { lat: 18.6298, lng: 73.7997 },
+      'Patna': { lat: 25.5941, lng: 85.1376 },
+      'Vadodara': { lat: 22.3072, lng: 73.1812 }
+    };
+    
+    const normalizedCity = city.trim();
+    return cityMap[normalizedCity] || null;
+  }
 
   // Helper function to classify rain type
   function classifyRainType(precipitation: number): string {
