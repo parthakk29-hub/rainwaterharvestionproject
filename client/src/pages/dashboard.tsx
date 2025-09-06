@@ -13,6 +13,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line } from "recharts";
 import { 
   Droplets, 
   DollarSign, 
@@ -118,6 +120,8 @@ export default function Dashboard() {
     name: '',
     location: '',
     rooftopArea: '',
+    rooftopLength: '',
+    rooftopWidth: '',
     rooftopType: ''
   });
 
@@ -150,6 +154,8 @@ export default function Dashboard() {
         name: profile.name || '',
         location: profile.location || '',
         rooftopArea: profile.rooftopArea || '',
+        rooftopLength: (profile as any).rooftopLength || '',
+        rooftopWidth: (profile as any).rooftopWidth || '',
         rooftopType: profile.rooftopType || ''
       });
     }
