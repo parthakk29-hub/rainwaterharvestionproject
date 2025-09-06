@@ -213,6 +213,39 @@ export default function Dashboard() {
     refetchInterval: 60000, // Auto-refresh every minute
   });
 
+  // Create calculations mutation
+  const createCalculationsMutation = useMutation({
+    mutationFn: async (calculationData: any) => {
+      const response = await apiRequest('POST', '/api/calculations', calculationData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calculations"] });
+    },
+    onError: (error) => {
+      console.error('Failed to create calculations:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create calculations",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create calculations when weather data is available
+  useEffect(() => {
+    if (weather && profile && !calculations && !calculationsLoading && !createCalculationsMutation.isPending) {
+      const rooftopArea = parseFloat(profile.rooftopArea || '0');
+      const monthlyRainfall = parseFloat(weather?.monthlyRainfall || '0');
+      
+      if (rooftopArea > 0 && monthlyRainfall > 0) {
+        createCalculationsMutation.mutate({
+          monthlyRainfall: monthlyRainfall.toString()
+        });
+      }
+    }
+  }, [weather, profile, calculations, calculationsLoading, createCalculationsMutation.isPending]);
+
   if (profileLoading || authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -224,7 +257,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!profile || !calculations) {
+  if (!profile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -238,13 +271,25 @@ export default function Dashboard() {
     );
   }
 
-  // Calculate values
-  const monthlyCollection = parseFloat(calculations.monthlyCollection || "0");
-  const monthlySavings = parseFloat(calculations.monthlySavings || "0");
-  const annualCollection = parseFloat(calculations.annualCollection || "0");
-  const annualSavings = parseFloat(calculations.annualSavings || "0");
+  // Show loading if calculations are being created
+  if (!calculations && (calculationsLoading || createCalculationsMutation.isPending)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-muted-foreground">Setting up your calculations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate values - provide defaults if calculations aren't ready yet
+  const monthlyCollection = parseFloat(calculations?.monthlyCollection || "0");
+  const monthlySavings = parseFloat(calculations?.monthlySavings || "0");
+  const annualCollection = parseFloat(calculations?.annualCollection || "0");
+  const annualSavings = parseFloat(calculations?.annualSavings || "0");
   const rooftopArea = parseFloat(profile.rooftopArea || "0");
-  const costRequiredRwh = parseFloat(calculations.costRequiredRwh || "50000");
+  const costRequiredRwh = parseFloat(calculations?.costRequiredRwh || "50000");
 
   // Generate monthly data for visualization
   const monthNames = [
