@@ -526,12 +526,13 @@ export default function Dashboard() {
                         Save Changes
                       </Button>
                       <Button
-                        variant="outline"
+                        variant="destructive"
                         onClick={() => window.location.href = '/api/logout'}
                         className="w-full flex items-center space-x-2"
+                        data-testid="button-logout"
                       >
                         <LogOut className="h-4 w-4" />
-                        <span>Switch Account</span>
+                        <span>Logout</span>
                       </Button>
                     </div>
                   </div>
