@@ -481,7 +481,16 @@ export default function Dashboard() {
                         className="w-full"
                         onClick={async () => {
                           try {
-                            await apiRequest('POST', '/api/profile', settingsData);
+                            // Calculate rooftop area from length and width if both are provided
+                            let updatedSettingsData = { ...settingsData };
+                            const length = parseFloat(settingsData.rooftopLength);
+                            const width = parseFloat(settingsData.rooftopWidth);
+                            
+                            if (!isNaN(length) && !isNaN(width) && length > 0 && width > 0) {
+                              updatedSettingsData.rooftopArea = (length * width).toString();
+                            }
+                            
+                            await apiRequest('POST', '/api/profile', updatedSettingsData);
                             toast({
                               title: "Success",
                               description: "Settings updated successfully",
@@ -706,7 +715,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-foreground flex items-center space-x-2">
                 <div className="text-2xl">📊</div>
-                <span>Annual Water Collection (Kid-Friendly View)</span>
+                <span>Annual Water Collection</span>
               </h3>
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <div className="text-xl">📅</div>
