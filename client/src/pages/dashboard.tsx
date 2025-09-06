@@ -39,7 +39,11 @@ import {
   Square,
   LogOut,
   Eye,
-  MoreVertical
+  MoreVertical,
+  TrendingUp,
+  Gauge,
+  Target,
+  Activity
 } from "lucide-react";
 import { useLocation } from "wouter";
 import type { InsertUserProfile } from "@shared/schema";
@@ -885,36 +889,131 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Annual Projection Chart */}
-          <Card>
+          {/* Enhanced Annual Projection Chart */}
+          <Card className="overflow-hidden">
             <CardContent className="p-6">
-              <h3 className="text-xl font-semibold text-foreground mb-6">Annual Projection</h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-foreground flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <span>Annual Projection</span>
+                </h3>
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <Activity className="h-4 w-4" />
+                  <span>12 months forecast</span>
+                </div>
+              </div>
               
-              <div className="space-y-4">
-                {monthlyData.slice(0, 5).map((month, index) => (
-                  <div key={month.month} className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{month.month}</span>
-                    <div className="flex-1 mx-4 bg-muted rounded-full h-2">
-                      <div 
-                        className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all" 
-                        style={{ width: `${(month.liters / maxMonthly) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-medium text-foreground">{month.liters}L</span>
+              {/* Key Metrics Grid */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/50 dark:to-blue-900/50 rounded-lg p-4 text-center">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Droplets className="h-4 w-4 text-white" />
                   </div>
-                ))}
+                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-300" data-testid="text-annual-total">
+                    {(annualCollection / 1000).toFixed(1)}K
+                  </div>
+                  <div className="text-xs text-blue-600 dark:text-blue-400">Liters/Year</div>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/50 dark:to-green-900/50 rounded-lg p-4 text-center">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <DollarSign className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-green-700 dark:text-green-300" data-testid="text-annual-savings">
+                    ₹{(annualSavings / 1000).toFixed(1)}K
+                  </div>
+                  <div className="text-xs text-green-600 dark:text-green-400">Savings/Year</div>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/50 dark:to-purple-900/50 rounded-lg p-4 text-center">
+                  <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <Target className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                    {Math.round((annualCollection / (rooftopArea * 12 * 2.5 * 0.85)) * 100)}
+                  </div>
+                  <div className="text-xs text-purple-600 dark:text-purple-400">Efficiency %</div>
+                </div>
+              </div>
+
+              {/* Enhanced Monthly Chart */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Monthly Collection (Liters)</span>
+                  <span className="text-muted-foreground">Peak: {maxMonthly}L</span>
+                </div>
+                {monthlyData.map((month, index) => {
+                  const percentage = (month.liters / maxMonthly) * 100;
+                  const savings = month.liters * 0.002; // Approximate savings per liter
+                  const isCurrentMonth = index === new Date().getMonth();
+                  
+                  return (
+                    <div key={month.month} className={`group transition-all duration-200 hover:bg-muted/50 rounded-lg p-3 ${
+                      isCurrentMonth ? 'bg-primary/5 border border-primary/20' : ''
+                    }`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className={`text-sm font-medium ${
+                            isCurrentMonth ? 'text-primary' : 'text-foreground'
+                          }`}>
+                            {month.month}
+                          </span>
+                          {isCurrentMonth && (
+                            <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <span className="text-sm text-muted-foreground">₹{savings.toFixed(0)}</span>
+                          <span className="text-sm font-semibold text-foreground min-w-[60px] text-right">
+                            {month.liters}L
+                          </span>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-500 group-hover:shadow-lg ${
+                              isCurrentMonth 
+                                ? 'bg-gradient-to-r from-primary via-primary to-primary/80' 
+                                : 'bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600'
+                            }`}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-end pr-2">
+                          <span className="text-xs font-medium text-white drop-shadow-lg">
+                            {percentage.toFixed(0)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
                 
-                <div className="pt-4 border-t border-border">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-foreground">Annual Total</span>
-                    <span className="text-xl font-bold text-primary" data-testid="text-annual-total">
-                      {annualCollection.toFixed(0)}L
+              {/* Summary Statistics */}
+              <div className="mt-6 pt-4 border-t border-border">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="flex items-center justify-center space-x-2 mb-1">
+                      <Gauge className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Avg Monthly</span>
+                    </div>
+                    <span className="text-lg font-bold text-foreground">
+                      {(annualCollection / 12).toFixed(0)}L
                     </span>
                   </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-muted-foreground">Estimated Savings</span>
-                    <span className="text-lg font-semibold text-secondary" data-testid="text-annual-savings">
-                      ₹{annualSavings.toFixed(0)}/year
+                  <div className="text-center">
+                    <div className="flex items-center justify-center space-x-2 mb-1">
+                      <Shield className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Water Security</span>
+                    </div>
+                    <span className={`text-lg font-bold ${
+                      annualCollection > 10000 ? 'text-green-600' :
+                      annualCollection > 5000 ? 'text-yellow-600' : 'text-red-600'
+                    }`}>
+                      {annualCollection > 10000 ? 'High' :
+                       annualCollection > 5000 ? 'Medium' : 'Low'}
                     </span>
                   </div>
                 </div>
