@@ -348,32 +348,47 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Dynamic Weather-based Background Animation */}
       <div className="fixed inset-0 pointer-events-none z-[-1]">
-        {/* Rain Animation - Show when there's upcoming rain */}
-        {forecasts?.forecasts?.some(f => f.precipitationSum > 0) && (
-          <div className="rain-animation">
-            {[...Array(forecasts?.forecasts?.find(f => f.precipitationSum > 0)?.precipitationSum && forecasts?.forecasts?.find(f => f.precipitationSum > 0)!.precipitationSum > 10 ? 80 : 50)].map((_, i) => (
-              <div 
-                key={i} 
-                className="raindrop" 
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 2}s`,
-                  animationDuration: `${0.5 + Math.random() * 0.5}s`
-                }}
-              />
-            ))}
-          </div>
-        )}
-        
-        {/* Sunny Day Animation - Show when no rain expected */}
-        {forecasts?.forecasts && !forecasts.forecasts.some(f => f.precipitationSum > 0) && (
-          <div className="sun-animation">
-            <div className="sun-rays"></div>
-          </div>
-        )}
-        
-        {/* Cloudy Animation - Default when weather data is loading */}
+        {/* Show loading animation while fetching */}
         {forecastLoading && (
+          <div className="cloud-animation">
+            <div className="cloud"></div>
+            <div className="cloud cloud-delayed"></div>
+          </div>
+        )}
+        
+        {/* Show weather-based animations when data is available */}
+        {!forecastLoading && forecasts?.forecasts && (
+          <>
+            {/* Rain Animation - Show when there's upcoming rain in next 3 days */}
+            {forecasts.forecasts.slice(0, 3).some(f => f.precipitationSum > 0) ? (
+              <div className="rain-animation">
+                {(() => {
+                  const maxRain = Math.max(...forecasts.forecasts.slice(0, 3).map(f => f.precipitationSum));
+                  const rainIntensity = maxRain > 10 ? 80 : maxRain > 5 ? 60 : 40;
+                  return [...Array(rainIntensity)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className="raindrop" 
+                      style={{
+                        left: `${Math.random() * 100}%`,
+                        animationDelay: `${Math.random() * 2}s`,
+                        animationDuration: `${0.4 + Math.random() * 0.6}s`
+                      }}
+                    />
+                  ));
+                })()}
+              </div>
+            ) : (
+              /* Sunny Day Animation - Show when no significant rain expected */
+              <div className="sun-animation">
+                <div className="sun-rays"></div>
+              </div>
+            )}
+          </>
+        )}
+        
+        {/* Default animation when no forecast data available */}
+        {!forecastLoading && (!forecasts || !forecasts.forecasts || forecasts.forecasts.length === 0) && (
           <div className="cloud-animation">
             <div className="cloud"></div>
             <div className="cloud cloud-delayed"></div>
