@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -57,6 +58,8 @@ export default function Dashboard() {
   const { theme, toggleTheme } = useTheme();
   const queryClient = useQueryClient();
   const [, setRoute] = useLocation();
+  const [selectedAction, setSelectedAction] = useState<'maintenance' | 'upgrade' | 'incentives' | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -189,27 +192,47 @@ export default function Dashboard() {
 
   // Handle maximize system actions
   const handleMaximizeAction = (action: 'maintenance' | 'upgrade' | 'incentives') => {
+    setSelectedAction(action);
+    setIsDialogOpen(true);
+  };
+
+  const getActionInfo = (action: 'maintenance' | 'upgrade' | 'incentives') => {
     const actionInfo = {
       maintenance: {
         title: "Maintenance Tips",
-        description: "Regular maintenance ensures optimal water collection:\n\n• Clean gutters and filters monthly\n• Inspect roof for damage after storms\n• Check storage tank for sediment buildup\n• Ensure proper mosquito-proofing\n• Maintain first-flush diverters"
+        description: "Regular maintenance ensures optimal water collection:",
+        items: [
+          "Clean gutters and filters monthly",
+          "Inspect roof for damage after storms",
+          "Check storage tank for sediment buildup",
+          "Ensure proper mosquito-proofing",
+          "Maintain first-flush diverters"
+        ]
       },
       upgrade: {
         title: "Upgrade Options", 
-        description: "Enhance your rainwater harvesting system:\n\n• Install larger storage capacity tanks\n• Add water filtration systems\n• Include smart monitoring sensors\n• Upgrade to UV sterilization\n• Install automated pumps for distribution"
+        description: "Enhance your rainwater harvesting system:",
+        items: [
+          "Install larger storage capacity tanks",
+          "Add water filtration systems",
+          "Include smart monitoring sensors",
+          "Upgrade to UV sterilization",
+          "Install automated pumps for distribution"
+        ]
       },
       incentives: {
         title: "Local Incentives",
-        description: "Available benefits for rainwater harvesting in India:\n\n• Government subsidies up to ₹50,000\n• Property tax rebates (5-10%)\n• Water bill discounts in many cities\n• Fast-track building approvals\n• Carbon credit opportunities"
+        description: "Available benefits for rainwater harvesting in India:",
+        items: [
+          "Government subsidies up to ₹50,000",
+          "Property tax rebates (5-10%)",
+          "Water bill discounts in many cities",
+          "Fast-track building approvals",
+          "Carbon credit opportunities"
+        ]
       }
     };
-
-    const info = actionInfo[action];
-    toast({
-      title: info.title,
-      description: info.description,
-      duration: 8000,
-    });
+    return actionInfo[action];
   };
 
   // Auto-calculate if we have profile but no calculations
@@ -707,6 +730,32 @@ export default function Dashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Centered Maximize Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-foreground">
+              {selectedAction && getActionInfo(selectedAction).title}
+            </DialogTitle>
+            <DialogDescription className="text-base text-muted-foreground">
+              {selectedAction && getActionInfo(selectedAction).description}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            {selectedAction && (
+              <ul className="space-y-3">
+                {getActionInfo(selectedAction).items.map((item, index) => (
+                  <li key={index} className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-foreground">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
