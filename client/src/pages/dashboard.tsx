@@ -116,6 +116,7 @@ export default function Dashboard() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showIncentives, setShowIncentives] = useState(false);
   const [settingsData, setSettingsData] = useState({
     name: '',
     location: '',
@@ -889,9 +890,10 @@ export default function Dashboard() {
                 className="text-2xl font-semibold text-blue-800 dark:text-blue-200 flex items-center space-x-2 hover:text-blue-600 dark:hover:text-blue-300 transition-colors cursor-pointer group"
                 data-testid="button-maximize-system"
                 onClick={() => {
+                  setShowIncentives(!showIncentives);
                   toast({
-                    title: "System Optimization",
-                    description: "Opening advanced system optimization features...",
+                    title: showIncentives ? "Incentives Hidden" : "Incentives Revealed",
+                    description: showIncentives ? "Click again to view incentives" : "Discover available incentives and benefits!",
                   });
                 }}
               >
@@ -946,37 +948,35 @@ export default function Dashboard() {
                 </ul>
               </div>
 
-              {/* System Status */}
-              <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
-                <div className="flex items-center space-x-2 mb-3">
-                  <span className="text-2xl">📊</span>
-                  <h4 className="font-semibold text-blue-800 dark:text-blue-200">System Health</h4>
-                </div>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between items-center">
-                    <span className="text-blue-700 dark:text-blue-300">Collection Rate:</span>
-                    <span className={`font-semibold px-2 py-1 rounded-full text-xs ${
-                      (monthlyCollection / rooftopArea) > 0.5 
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
-                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                    }`}>
-                      {((monthlyCollection / rooftopArea) > 0.5) ? 'Excellent' : 'Good'}
-                    </span>
+              {/* Incentives */}
+              {showIncentives && (
+                <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50 animate-in slide-in-from-top-4 duration-300">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <span className="text-2xl">🎁</span>
+                    <h4 className="font-semibold text-blue-800 dark:text-blue-200">Incentives</h4>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-blue-700 dark:text-blue-300">Roof Efficiency:</span>
-                    <span className="font-semibold px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                      85% ✅
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-blue-700 dark:text-blue-300">Maintenance:</span>
-                    <span className="font-semibold px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200">
-                      Due Soon 🔧
-                    </span>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-700 dark:text-blue-300">Government Subsidy:</span>
+                      <span className="font-semibold px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                        ₹15,000 Available 💰
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-700 dark:text-blue-300">Tax Benefits:</span>
+                      <span className="font-semibold px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        20% Deduction 📊
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-blue-700 dark:text-blue-300">Water Board Rebate:</span>
+                      <span className="font-semibold px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        ₹5,000 Cashback 🎯
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Action Buttons */}
