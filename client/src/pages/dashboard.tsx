@@ -2,6 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -27,9 +32,17 @@ import {
   Wind,
   Calendar,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  ChevronDown,
+  User,
+  MapPin,
+  Square,
+  LogOut,
+  Eye,
+  MoreVertical
 } from "lucide-react";
 import { useLocation } from "wouter";
+import type { InsertUserProfile } from "@shared/schema";
 
 interface UserProfile {
   id: string;
@@ -37,6 +50,7 @@ interface UserProfile {
   location: string;
   city: string;
   rooftopArea: string;
+  rooftopType?: string;
   latitude?: string;
   longitude?: string;
 }
@@ -94,6 +108,14 @@ export default function Dashboard() {
   const [, setRoute] = useLocation();
   const [selectedAction, setSelectedAction] = useState<'maintenance' | 'upgrade' | 'incentives' | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsData, setSettingsData] = useState({
+    name: '',
+    location: '',
+    rooftopArea: '',
+    rooftopType: ''
+  });
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -116,6 +138,18 @@ export default function Dashboard() {
     enabled: isAuthenticated,
     retry: false,
   });
+
+  // Sync settings data when profile loads
+  useEffect(() => {
+    if (profile) {
+      setSettingsData({
+        name: profile.name || '',
+        location: profile.location || '',
+        rooftopArea: profile.rooftopArea || '',
+        rooftopType: profile.rooftopType || ''
+      });
+    }
+  }, [profile]);
 
   // Fetch water calculations
   const { data: calculations, isLoading: calculationsLoading } = useQuery<WaterCalculation>({
@@ -169,6 +203,73 @@ export default function Dashboard() {
     enabled: isAuthenticated,
     retry: false,
     refetchInterval: 60000, // Auto-refresh every minute
+  });
+
+  // Fetch notifications list
+  const { data: notificationsData } = useQuery<{ notifications: Notification[] }>({
+    queryKey: ["/api/notifications"],
+    enabled: isAuthenticated,
+    retry: false,
+    refetchInterval: 60000, // Auto-refresh every minute
+  });
+
+  // Mark notification as read mutation
+  const markAsReadMutation = useMutation({
+    mutationFn: async (notificationId: string) => {
+      const response = await apiRequest('PATCH', `/api/notifications/${notificationId}/read`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications/count"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "Please sign in again",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to mark notification as read",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (profileData: Partial<InsertUserProfile>) => {
+      const response = await apiRequest('POST', '/api/profile', profileData);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/calculations"] });
+      setIsSettingsOpen(false);
+      toast({
+        title: "Success",
+        description: "Settings updated successfully",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "Please sign in again",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update settings",
+        variant: "destructive",
+      });
+    },
   });
 
   // Create calculations mutation
@@ -298,6 +399,53 @@ export default function Dashboard() {
     return actionInfo[action];
   };
 
+  // Handle notification click
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.isRead) {
+      markAsReadMutation.mutate(notification.id);
+    }
+  };
+
+  // Handle settings save
+  const handleSettingsSave = () => {
+    updateProfileMutation.mutate({
+      name: settingsData.name,
+      location: settingsData.location,
+      rooftopArea: settingsData.rooftopArea,
+      rooftopType: settingsData.rooftopType
+    });
+  };
+
+  // Format notification time
+  const formatNotificationTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  // Get notification icon based on type
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'rain_alert':
+        return CloudRain;
+      case 'maintenance_reminder':
+        return Settings;
+      case 'system_update':
+        return CheckCircle;
+      default:
+        return Bell;
+    }
+  };
+
   // Auto-calculate if we have profile but no calculations
   useEffect(() => {
     if (profile && !calculations && !calculationsLoading && weather) {
@@ -406,22 +554,189 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-foreground">Boondh Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
-              {/* Notification Bell */}
-              <div className="relative">
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="h-8 w-8"
-                  data-testid="button-notifications"
-                >
-                  <Bell className="h-4 w-4" />
-                  {notificationCount?.count && notificationCount.count > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {notificationCount.count > 9 ? '9+' : notificationCount.count}
-                    </span>
-                  )}
-                </Button>
-              </div>
+              {/* Enhanced Notification Bell with Dropdown */}
+              <DropdownMenu open={isNotificationOpen} onOpenChange={setIsNotificationOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 relative"
+                    data-testid="button-notifications"
+                  >
+                    <Bell className="h-4 w-4" />
+                    {notificationCount?.count && notificationCount.count > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {notificationCount.count > 9 ? '9+' : notificationCount.count}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <DropdownMenuLabel className="flex items-center justify-between">
+                    <span>Notifications</span>
+                    {notificationCount?.count && notificationCount.count > 0 && (
+                      <span className="text-xs text-muted-foreground">
+                        {notificationCount.count} unread
+                      </span>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="max-h-96 overflow-y-auto">
+                    {notificationsData?.notifications && notificationsData.notifications.length > 0 ? (
+                      notificationsData.notifications.slice(0, 10).map((notification) => {
+                        const IconComponent = getNotificationIcon(notification.type);
+                        return (
+                          <DropdownMenuItem
+                            key={notification.id}
+                            className={`cursor-pointer p-3 flex items-start space-x-3 ${
+                              !notification.isRead ? 'bg-blue-50 dark:bg-blue-950/20' : ''
+                            }`}
+                            onClick={() => handleNotificationClick(notification)}
+                            data-testid={`notification-${notification.id}`}
+                          >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              notification.type === 'rain_alert' ? 'bg-blue-100 dark:bg-blue-900' :
+                              notification.type === 'maintenance_reminder' ? 'bg-orange-100 dark:bg-orange-900' :
+                              'bg-green-100 dark:bg-green-900'
+                            }`}>
+                              <IconComponent className={`h-4 w-4 ${
+                                notification.type === 'rain_alert' ? 'text-blue-600 dark:text-blue-400' :
+                                notification.type === 'maintenance_reminder' ? 'text-orange-600 dark:text-orange-400' :
+                                'text-green-600 dark:text-green-400'
+                              }`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <p className={`text-sm font-medium truncate ${
+                                  !notification.isRead ? 'text-foreground' : 'text-muted-foreground'
+                                }`}>
+                                  {notification.title}
+                                </p>
+                                {!notification.isRead && (
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2" />
+                                )}
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {formatNotificationTime(notification.createdAt)}
+                              </p>
+                            </div>
+                          </DropdownMenuItem>
+                        );
+                      })
+                    ) : (
+                      <div className="p-4 text-center text-muted-foreground">
+                        <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">No notifications yet</p>
+                      </div>
+                    )}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Settings Dropdown */}
+              <DropdownMenu open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8"
+                    data-testid="button-settings"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80">
+                  <DropdownMenuLabel>Account Settings</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="p-4 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="settings-name" className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>Name</span>
+                      </Label>
+                      <Input
+                        id="settings-name"
+                        value={settingsData.name}
+                        onChange={(e) => setSettingsData({...settingsData, name: e.target.value})}
+                        placeholder="Enter your name"
+                        data-testid="input-settings-name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="settings-location" className="flex items-center space-x-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>Location</span>
+                      </Label>
+                      <Input
+                        id="settings-location"
+                        value={settingsData.location}
+                        onChange={(e) => setSettingsData({...settingsData, location: e.target.value})}
+                        placeholder="Enter your location"
+                        data-testid="input-settings-location"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="settings-area" className="flex items-center space-x-2">
+                        <Square className="h-4 w-4" />
+                        <span>Rooftop Area (sq ft)</span>
+                      </Label>
+                      <Input
+                        id="settings-area"
+                        type="number"
+                        value={settingsData.rooftopArea}
+                        onChange={(e) => setSettingsData({...settingsData, rooftopArea: e.target.value})}
+                        placeholder="Enter rooftop area"
+                        data-testid="input-settings-area"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="settings-type" className="flex items-center space-x-2">
+                        <Home className="h-4 w-4" />
+                        <span>Rooftop Type</span>
+                      </Label>
+                      <Select
+                        value={settingsData.rooftopType}
+                        onValueChange={(value) => setSettingsData({...settingsData, rooftopType: value})}
+                      >
+                        <SelectTrigger data-testid="select-settings-type">
+                          <SelectValue placeholder="Select rooftop type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="concrete">Concrete</SelectItem>
+                          <SelectItem value="tile">Tile</SelectItem>
+                          <SelectItem value="metal">Metal</SelectItem>
+                          <SelectItem value="shingle">Shingle</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <Separator />
+                    <div className="flex flex-col space-y-2">
+                      <Button
+                        onClick={handleSettingsSave}
+                        disabled={updateProfileMutation.isPending}
+                        className="w-full"
+                        data-testid="button-save-settings"
+                      >
+                        {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => window.location.href = '/api/logout'}
+                        className="w-full flex items-center space-x-2"
+                        data-testid="button-switch-account"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Switch Account</span>
+                      </Button>
+                    </div>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -438,13 +753,6 @@ export default function Dashboard() {
               <span className="text-sm font-medium text-muted-foreground" data-testid="text-welcome">
                 Welcome, {profile.name || (user as any)?.user?.firstName || "User"}
               </span>
-              <a 
-                href="/api/logout"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="link-logout"
-              >
-                Logout
-              </a>
             </div>
           </div>
         </div>
