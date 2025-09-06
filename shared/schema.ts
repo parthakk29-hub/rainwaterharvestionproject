@@ -7,6 +7,8 @@ import {
   varchar,
   decimal,
   text,
+  boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -66,6 +68,37 @@ export const waterCalculations = pgTable("water_calculations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Weather forecast data
+export const weatherForecasts = pgTable("weather_forecasts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userProfileId: varchar("user_profile_id").notNull().references(() => userProfiles.id),
+  date: timestamp("date").notNull(),
+  temperature: decimal("temperature", { precision: 4, scale: 1 }),
+  maxTemperature: decimal("max_temperature", { precision: 4, scale: 1 }),
+  minTemperature: decimal("min_temperature", { precision: 4, scale: 1 }),
+  precipitationSum: decimal("precipitation_sum", { precision: 6, scale: 2 }), // in mm
+  weatherCode: integer("weather_code"), // WMO weather code
+  windSpeed: decimal("wind_speed", { precision: 5, scale: 2 }),
+  rainType: varchar("rain_type"), // light, moderate, heavy, storm
+  collectableRain: boolean("collectable_rain").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Notification system
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: varchar("type").notNull(), // rain_alert, maintenance_reminder, system_update
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false),
+  emailSent: boolean("email_sent").default(false),
+  rainType: varchar("rain_type"), // for rain alerts
+  expectedRainfall: decimal("expected_rainfall", { precision: 6, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
@@ -81,7 +114,22 @@ export const insertWaterCalculationSchema = createInsertSchema(waterCalculations
   updatedAt: true,
 });
 
+export const insertWeatherForecastSchema = createInsertSchema(weatherForecasts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertWaterCalculation = z.infer<typeof insertWaterCalculationSchema>;
 export type WaterCalculation = typeof waterCalculations.$inferSelect;
+export type InsertWeatherForecast = z.infer<typeof insertWeatherForecastSchema>;
+export type WeatherForecast = typeof weatherForecasts.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
