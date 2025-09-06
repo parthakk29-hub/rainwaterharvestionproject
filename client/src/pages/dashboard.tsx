@@ -767,63 +767,87 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Enhanced Monthly Chart with Emojis */}
-            <div className="space-y-3">
+            {/* Monthly Collection Chart */}
+            <div className="space-y-4">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">🗓️ Monthly Collection (Liters)</span>
                 <span className="text-muted-foreground">🏆 Best Month: {maxMonthly}L</span>
               </div>
-              {monthlyData.map((month, index) => {
-                const percentage = (month.liters / maxMonthly) * 100;
-                const savings = month.liters * 0.002; // Approximate savings per liter
-                const isCurrentMonth = index === new Date().getMonth();
-                const seasonEmoji = index >= 5 && index <= 8 ? '🌧️' : '☀️';
-                
-                return (
-                  <div key={month.month} className={`group transition-all duration-200 hover:bg-muted/50 rounded-lg p-3 ${
-                    isCurrentMonth ? 'bg-primary/5 border border-primary/20' : ''
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg">{seasonEmoji}</span>
-                        <span className={`text-sm font-medium ${
-                          isCurrentMonth ? 'text-primary' : 'text-foreground'
-                        }`}>
-                          {month.month}
-                        </span>
-                        {isCurrentMonth && (
-                          <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
-                            👈 Now!
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="text-sm text-muted-foreground">💰₹{savings.toFixed(0)}</span>
-                        <span className="text-sm font-semibold text-foreground min-w-[60px] text-right">
-                          {month.liters}L
-                        </span>
-                      </div>
-                    </div>
-                    <div className="relative">
-                      <div className="w-full bg-muted rounded-full h-4 overflow-hidden">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-500 group-hover:shadow-lg ${
-                            isCurrentMonth 
-                              ? 'bg-gradient-to-r from-primary via-primary to-primary/80' 
-                              : 'bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600'
-                          }`}
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-end pr-2">
-                        <span className="text-xs font-medium text-white drop-shadow-lg">
-                          {percentage.toFixed(0)}% 📊
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              
+              {/* Bar Chart */}
+              <div className="h-80 w-full">
+                <ChartContainer
+                  config={{
+                    liters: {
+                      label: "Liters",
+                      color: "hsl(var(--chart-1))",
+                    },
+                  }}
+                  className="h-full w-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis 
+                        dataKey="month" 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12 }}
+                        className="text-muted-foreground"
+                      />
+                      <YAxis 
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fontSize: 12 }}
+                        className="text-muted-foreground"
+                      />
+                      <ChartTooltip
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            const data = payload[0];
+                            const currentMonth = new Date().getMonth();
+                            const monthIndex = monthlyData.findIndex(m => m.month === label);
+                            const isCurrentMonth = monthIndex === currentMonth;
+                            const seasonEmoji = monthIndex >= 5 && monthIndex <= 8 ? '🌧️' : '☀️';
+                            const savings = (data.value as number * 0.002).toFixed(0);
+                            
+                            return (
+                              <div className="rounded-lg border bg-background p-3 shadow-md">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <span className="text-lg">{seasonEmoji}</span>
+                                  <span className="font-medium">{label}</span>
+                                  {isCurrentMonth && (
+                                    <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">
+                                      Current
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Collection:</span>
+                                    <span className="font-semibold">{data.value}L 💧</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Savings:</span>
+                                    <span className="font-semibold">₹{savings} 💰</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                      <Bar 
+                        dataKey="liters" 
+                        fill="hsl(var(--primary))"
+                        radius={[4, 4, 0, 0]}
+                        className="fill-primary"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
             </div>
               
             {/* Summary Statistics */}
