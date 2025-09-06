@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -15,7 +16,9 @@ import {
   Share,
   BarChart3,
   Briefcase,
-  Shield
+  Shield,
+  Sun,
+  Moon
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -36,6 +39,7 @@ interface WaterCalculation {
   monthlySavings: string;
   annualCollection: string;
   annualSavings: string;
+  costRequiredRwh?: string;
 }
 
 interface WeatherData {
@@ -50,6 +54,7 @@ interface WeatherData {
 export default function Dashboard() {
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const queryClient = useQueryClient();
   const [, setRoute] = useLocation();
 
@@ -232,6 +237,7 @@ export default function Dashboard() {
   const monthlySavings = calculations ? parseFloat(calculations.monthlySavings) : 0;
   const annualCollection = calculations ? parseFloat(calculations.annualCollection) : 0;
   const annualSavings = calculations ? parseFloat(calculations.annualSavings) : 0;
+  const costRequiredRwh = calculations?.costRequiredRwh ? parseFloat(calculations.costRequiredRwh) : 150000; // Default ₹1.5 lakhs
   const rooftopArea = parseFloat(profile.rooftopArea || "0");
 
   // Mock monthly data for chart
@@ -255,7 +261,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Animated Rain Background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-[-1]">
         <div className="rain-animation">
           {[...Array(50)].map((_, i) => (
             <div 
@@ -281,6 +287,19 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-foreground">Boondh Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={toggleTheme}
+                className="h-8 w-8"
+                data-testid="button-theme-toggle"
+              >
+                {theme === "light" ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Sun className="h-4 w-4" />
+                )}
+              </Button>
               <span className="text-sm font-medium text-muted-foreground" data-testid="text-welcome">
                 Welcome, {profile.name || (user as any)?.user?.firstName || "User"}
               </span>
@@ -300,7 +319,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Overview Cards */}
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -356,6 +375,21 @@ export default function Dashboard() {
               </div>
               <div className="text-2xl font-bold text-foreground mb-1">85%</div>
               <p className="text-sm text-muted-foreground">Runoff coefficient</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-foreground">Setup Cost</h3>
+                <div className="w-10 h-10 bg-chart-5/10 rounded-lg flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-chart-5" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-foreground mb-1" data-testid="text-setup-cost">
+                ₹{(costRequiredRwh / 1000).toFixed(0)}k
+              </div>
+              <p className="text-sm text-muted-foreground">RWH system investment</p>
             </CardContent>
           </Card>
         </div>

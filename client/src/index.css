@@ -52,50 +52,50 @@
 }
 
 .dark {
-  --background: hsl(0, 0%, 0%);
-  --foreground: hsl(200, 6.67%, 91.18%);
-  --card: hsl(228, 9.8%, 10%);
-  --card-foreground: hsl(0, 0%, 85.1%);
-  --popover: hsl(0, 0%, 0%);
-  --popover-foreground: hsl(200, 6.67%, 91.18%);
-  --primary: hsl(200, 98%, 39%);
+  --background: hsl(225, 100%, 3%);
+  --foreground: hsl(220, 25%, 90%);
+  --card: hsl(225, 25%, 8%);
+  --card-foreground: hsl(220, 25%, 85%);
+  --popover: hsl(225, 25%, 8%);
+  --popover-foreground: hsl(220, 25%, 90%);
+  --primary: hsl(220, 90%, 60%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(158, 64%, 52%);
-  --secondary-foreground: hsl(210, 40%, 15%);
-  --muted: hsl(0, 0%, 9.41%);
-  --muted-foreground: hsl(210, 3.39%, 46.27%);
-  --accent: hsl(43, 96%, 56%);
-  --accent-foreground: hsl(200, 98%, 39%);
+  --secondary: hsl(200, 80%, 50%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(225, 25%, 12%);
+  --muted-foreground: hsl(220, 15%, 60%);
+  --accent: hsl(240, 80%, 70%);
+  --accent-foreground: hsl(0, 0%, 100%);
   --destructive: hsl(0, 84%, 60%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(210, 5.26%, 14.9%);
-  --input: hsl(207.69%, 27.66%, 18.43%);
-  --ring: hsl(200, 98%, 39%);
-  --chart-1: hsl(200, 98%, 39%);
-  --chart-2: hsl(158, 64%, 52%);
-  --chart-3: hsl(43, 96%, 56%);
-  --chart-4: hsl(280, 65%, 60%);
-  --chart-5: hsl(340, 75%, 55%);
-  --sidebar: hsl(228, 9.8%, 10%);
-  --sidebar-foreground: hsl(0, 0%, 85.1%);
-  --sidebar-primary: hsl(200, 98%, 39%);
+  --border: hsl(225, 20%, 15%);
+  --input: hsl(225, 25%, 18%);
+  --ring: hsl(220, 90%, 60%);
+  --chart-1: hsl(220, 90%, 60%);
+  --chart-2: hsl(200, 80%, 50%);
+  --chart-3: hsl(240, 80%, 70%);
+  --chart-4: hsl(260, 70%, 60%);
+  --chart-5: hsl(280, 70%, 60%);
+  --sidebar: hsl(225, 25%, 8%);
+  --sidebar-foreground: hsl(220, 25%, 85%);
+  --sidebar-primary: hsl(220, 90%, 60%);
   --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(205.71%, 70%, 7.84%);
-  --sidebar-accent-foreground: hsl(200, 98%, 39%);
-  --sidebar-border: hsl(205.71%, 15.79%, 26.08%);
-  --sidebar-ring: hsl(200, 98%, 39%);
+  --sidebar-accent: hsl(225, 25%, 12%);
+  --sidebar-accent-foreground: hsl(220, 90%, 60%);
+  --sidebar-border: hsl(225, 20%, 15%);
+  --sidebar-ring: hsl(220, 90%, 60%);
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: 0.5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 1px 2px -1px hsl(200, 98%, 39% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 1px 2px -1px hsl(200, 98%, 39% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 2px 4px -1px hsl(200, 98%, 39% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 4px 6px -1px hsl(200, 98%, 39% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00), 0px 8px 10px -1px hsl(200, 98%, 39% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(200, 98%, 39% / 0.00);
+  --shadow-2xs: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00);
+  --shadow-xs: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00);
+  --shadow-sm: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00), 0px 1px 2px -1px hsl(220, 90%, 60% / 0.00);
+  --shadow: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00), 0px 1px 2px -1px hsl(220, 90%, 60% / 0.00);
+  --shadow-md: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00), 0px 2px 4px -1px hsl(220, 90%, 60% / 0.00);
+  --shadow-lg: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00), 0px 4px 6px -1px hsl(220, 90%, 60% / 0.00);
+  --shadow-xl: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00), 0px 8px 10px -1px hsl(220, 90%, 60% / 0.00);
+  --shadow-2xl: 0px 2px 0px 0px hsl(220, 90%, 60% / 0.00);
 }
 
 @layer base {
@@ -120,9 +120,13 @@
   top: -10px;
   width: 2px;
   height: 20px;
-  background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.6), transparent);
+  background: linear-gradient(to bottom, transparent, rgba(59, 130, 246, 0.3), transparent);
   animation: rain-fall linear infinite;
   border-radius: 1px;
+}
+
+.dark .raindrop {
+  background: linear-gradient(to bottom, transparent, rgba(96, 165, 250, 0.4), transparent);
 }
 
 @keyframes rain-fall {
