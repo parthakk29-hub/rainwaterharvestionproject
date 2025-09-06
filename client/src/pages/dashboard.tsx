@@ -161,6 +161,22 @@ export default function Dashboard() {
     }
   }, [profile]);
 
+  // Auto-calculate rooftop area when length and width change
+  useEffect(() => {
+    const length = parseFloat(settingsData.rooftopLength);
+    const width = parseFloat(settingsData.rooftopWidth);
+    
+    if (!isNaN(length) && !isNaN(width) && length > 0 && width > 0) {
+      const calculatedArea = (length * width).toString();
+      if (calculatedArea !== settingsData.rooftopArea) {
+        setSettingsData(prev => ({
+          ...prev,
+          rooftopArea: calculatedArea
+        }));
+      }
+    }
+  }, [settingsData.rooftopLength, settingsData.rooftopWidth]);
+
   // Fetch water calculations
   const { data: calculations, isLoading: calculationsLoading } = useQuery<WaterCalculation>({
     queryKey: ["/api/calculations"],
