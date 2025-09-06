@@ -504,13 +504,39 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-foreground">Monthly Collection</h3>
                 <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <Droplets className="w-5 h-5 text-primary" />
+                  <BarChart3 className="w-5 h-5 text-primary" />
                 </div>
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1" data-testid="text-monthly-collection">
-                {monthlyCollection.toFixed(0)} L
+              <div className="h-48 w-full">
+                <ChartContainer
+                  config={{
+                    liters: {
+                      label: "Liters",
+                      color: "hsl(var(--primary))",
+                    },
+                  }}
+                  className="h-full w-full"
+                >
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 12 }}
+                      interval={0}
+                    />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <ChartTooltip 
+                      content={<ChartTooltipContent />}
+                    />
+                    <Bar 
+                      dataKey="liters" 
+                      fill="var(--color-liters)"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ChartContainer>
               </div>
-              <p className="text-sm text-secondary">Based on current setup</p>
+              <p className="text-sm text-muted-foreground mt-2">Monthly collection varies by season</p>
             </CardContent>
           </Card>
 
