@@ -538,47 +538,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Overview Cards */}
-        <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground">Monthly Collection</h3>
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-primary" />
-                </div>
-              </div>
-              <div className="h-48 w-full">
-                <ChartContainer
-                  config={{
-                    liters: {
-                      label: "Liters",
-                      color: "hsl(var(--primary))",
-                    },
-                  }}
-                  className="h-full w-full"
-                >
-                  <BarChart data={monthlyData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="month" 
-                      tick={{ fontSize: 12 }}
-                      interval={0}
-                    />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <ChartTooltip 
-                      content={<ChartTooltipContent />}
-                    />
-                    <Bar 
-                      dataKey="liters" 
-                      fill="var(--color-liters)"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ChartContainer>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">Monthly collection varies by season</p>
-            </CardContent>
-          </Card>
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 mb-8">
 
           <Card>
             <CardContent className="p-6">
