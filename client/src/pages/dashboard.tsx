@@ -346,21 +346,39 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Animated Rain Background */}
+      {/* Dynamic Weather-based Background Animation */}
       <div className="fixed inset-0 pointer-events-none z-[-1]">
-        <div className="rain-animation">
-          {[...Array(50)].map((_, i) => (
-            <div 
-              key={i} 
-              className="raindrop" 
-              style={{
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${0.5 + Math.random() * 0.5}s`
-              }}
-            />
-          ))}
-        </div>
+        {/* Rain Animation - Show when there's upcoming rain */}
+        {forecasts?.forecasts?.some(f => f.precipitationSum > 0) && (
+          <div className="rain-animation">
+            {[...Array(forecasts?.forecasts?.find(f => f.precipitationSum > 0)?.precipitationSum && forecasts?.forecasts?.find(f => f.precipitationSum > 0)!.precipitationSum > 10 ? 80 : 50)].map((_, i) => (
+              <div 
+                key={i} 
+                className="raindrop" 
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${0.5 + Math.random() * 0.5}s`
+                }}
+              />
+            ))}
+          </div>
+        )}
+        
+        {/* Sunny Day Animation - Show when no rain expected */}
+        {forecasts?.forecasts && !forecasts.forecasts.some(f => f.precipitationSum > 0) && (
+          <div className="sun-animation">
+            <div className="sun-rays"></div>
+          </div>
+        )}
+        
+        {/* Cloudy Animation - Default when weather data is loading */}
+        {forecastLoading && (
+          <div className="cloud-animation">
+            <div className="cloud"></div>
+            <div className="cloud cloud-delayed"></div>
+          </div>
+        )}
       </div>
       {/* Dashboard Navigation */}
       <nav className="bg-card shadow-sm border-b border-border sticky top-0 z-10">
