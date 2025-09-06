@@ -91,12 +91,15 @@ export default function Location() {
           );
           
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`Geocoding service error: ${response.status}`);
           }
           
           const data = await response.json();
-          const city = data.city || data.locality || data.principalSubdivision || "Unknown City";
-          const locationStr = `${city}, ${data.principalSubdivision || data.countryName || "India"}`;
+          
+          // Better data extraction with fallbacks
+          const city = data.city || data.locality || data.principalSubdivision || data.countryName || "Current Location";
+          const state = data.principalSubdivision || data.countryName || "India";
+          const locationStr = `${city}${state !== city ? `, ${state}` : ""}`;
           
           setLocationText(locationStr);
           updateLocationMutation.mutate({
