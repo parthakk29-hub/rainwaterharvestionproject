@@ -181,15 +181,19 @@ export default function Dashboard() {
   });
 
   // Fetch 7-day weather forecast
-  const { data: forecasts, isLoading: forecastLoading } = useQuery<{ forecasts: WeatherForecast[] }>({
+  const { data: forecasts, isLoading: forecastLoading, error: forecastError } = useQuery<{ forecasts: WeatherForecast[] }>({
     queryKey: ["/api/weather", profile?.id],
     queryFn: async () => {
       const response = await fetch(`/api/weather/${profile?.id}`);
-      if (!response.ok) throw new Error('Failed to fetch weather forecast');
+      if (!response.ok) {
+        console.error('Weather forecast fetch failed:', response.status, response.statusText);
+        // Return empty forecasts instead of throwing error to prevent breaking the UI
+        return { forecasts: [] };
+      }
       return response.json();
     },
     enabled: isAuthenticated && !!profile?.id,
-    retry: false,
+    retry: 2,
     refetchInterval: 3600000, // Auto-refresh every hour
   });
 
