@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Droplets, DollarSign, Shield, Settings, Briefcase, BarChart3 } from "lucide-react";
+import { Droplets, DollarSign, Shield, Settings, Briefcase, BarChart3, Moon, Sun } from "lucide-react";
 import { Link } from "wouter";
+import { useTheme } from "@/hooks/useTheme";
 
 export default function Landing() {
+  const { theme, toggleTheme } = useTheme();
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation Header */}
@@ -16,13 +19,28 @@ export default function Landing() {
               </div>
               <h1 className="text-xl font-bold text-foreground">Boondh</h1>
             </div>
-            <a 
-              href="/api/login"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-signin"
-            >
-              Sign In
-            </a>
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={toggleTheme}
+                className="h-8 w-8"
+                data-testid="button-theme-toggle"
+              >
+                {theme === "light" ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Sun className="h-4 w-4" />
+                )}
+              </Button>
+              <a 
+                href="/api/login"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                data-testid="link-signin"
+              >
+                Sign In
+              </a>
+            </div>
           </div>
         </div>
       </nav>
