@@ -108,6 +108,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const monthlySavings = monthlyCollection * costPerLiter;
       const annualSavings = annualCollection * costPerLiter;
 
+      // Calculate efficiency features
+      const setupCost = req.body.costRequiredRwh || (effectiveRooftopArea * 2.5); // ₹2.5 per sq ft as default
+      
+      // Government incentives (typically 30-50% of setup cost)
+      const governmentIncentives = setupCost * 0.4; // 40% incentive
+      const subsidyAmount = setupCost * 0.2; // 20% subsidy
+      const taxBenefits = setupCost * 0.1; // 10% tax benefits
+      
+      // Maintenance costs (2-3% of setup cost annually)
+      const annualMaintenanceCost = setupCost * 0.025;
+      const filterReplacementCost = 2000; // ₹2000 annually for filter replacement
+      const systemInspectionCost = 1500; // ₹1500 annually for inspection
+      
+      // Upgradation costs
+      const upgradationCost = setupCost * 0.3; // 30% of original for major upgrades
+      const capacityExpansionCost = setupCost * 0.4; // 40% for capacity expansion
+      const efficiencyImprovementCost = setupCost * 0.15; // 15% for efficiency improvements
+      
+      // Financial metrics
+      const netSetupCost = setupCost - governmentIncentives - subsidyAmount - taxBenefits;
+      const netAnnualSavings = annualSavings - annualMaintenanceCost - filterReplacementCost - (systemInspectionCost / 2);
+      const paybackPeriod = netSetupCost / Math.max(netAnnualSavings, 1);
+      const roi = (netAnnualSavings / netSetupCost) * 100;
+
       const calculationData = insertWaterCalculationSchema.parse({
         userProfileId: profile.id,
         monthlyRainfall: monthlyRainfall.toString(),
@@ -116,6 +140,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         monthlySavings: monthlySavings.toString(),
         annualCollection: annualCollection.toString(),
         annualSavings: annualSavings.toString(),
+        costRequiredRwh: setupCost.toString(),
+        governmentIncentives: governmentIncentives.toString(),
+        subsidyAmount: subsidyAmount.toString(),
+        taxBenefits: taxBenefits.toString(),
+        annualMaintenanceCost: annualMaintenanceCost.toString(),
+        filterReplacementCost: filterReplacementCost.toString(),
+        systemInspectionCost: systemInspectionCost.toString(),
+        upgradationCost: upgradationCost.toString(),
+        capacityExpansionCost: capacityExpansionCost.toString(),
+        efficiencyImprovementCost: efficiencyImprovementCost.toString(),
+        paybackPeriod: paybackPeriod.toString(),
+        roi: roi.toString(),
       });
 
       // Check if calculations already exist
