@@ -155,7 +155,7 @@ export default function Location() {
 
     // Extract city from location string with better parsing
     const locationStr = location.trim();
-    const parts = locationStr.split(",").map(part => part.trim());
+    const parts = locationStr.split(",").map(part => part.trim()).filter(part => part.length > 0);
     
     // Try to get the most relevant city name
     let city = parts[0] || locationStr;
@@ -163,14 +163,25 @@ export default function Location() {
     // If it looks like a full address, try to get the city (usually the last or second-to-last part)
     if (parts.length > 2) {
       // For format like "123 Street, City, State" - take the second part
-      city = parts[1] || parts[0];
+      // But first check if the first part looks like a street number/address
+      const firstPart = parts[0];
+      if (/^\d+/.test(firstPart) && parts.length >= 2) {
+        city = parts[1]; // Take second part if first starts with number
+      } else {
+        city = parts[0]; // Take first part otherwise
+      }
     } else if (parts.length === 2) {
       // For format like "City, State" - take the first part
       city = parts[0];
     }
     
-    // Clean up common city prefixes/suffixes
+    // Clean up common city prefixes/suffixes and validate
     city = city.replace(/^(city of |town of |district |dt\.|dist\.)/i, '').trim();
+    
+    // Ensure city is not empty and has reasonable length
+    if (!city || city.length < 2) {
+      city = parts[0] || locationStr.substring(0, 20); // Use original as fallback
+    }
     
     console.log(`Extracted city "${city}" from location "${locationStr}"`);
 
