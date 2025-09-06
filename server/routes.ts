@@ -351,45 +351,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Profile not found" });
       }
 
-      if (!profile.latitude || !profile.longitude) {
-        return res.status(400).json({ message: "Location not set in profile" });
-      }
-
-      // Fetch 7-day weather forecast from Open-Meteo API
-      const lat = parseFloat(profile.latitude);
-      const lng = parseFloat(profile.longitude);
+      // First try to fetch existing forecasts from database
+      let forecasts = await storage.getWeatherForecasts(userProfileId);
       
-      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,wind_speed_10m_max&timezone=auto&forecast_days=7`;
-      
-      const response = await fetch(weatherUrl);
-      const weatherData = await response.json();
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch weather data');
-      }
-
-      // Process and classify rain data
-      const forecasts = weatherData.daily.time.map((date: string, index: number) => {
-        const precipitation = weatherData.daily.precipitation_sum[index] || 0;
-        const rainType = classifyRainType(precipitation);
-        const collectableRain = precipitation > 0.5; // Minimum 0.5mm to be worth collecting
+      // If we have recent forecasts (within the last 6 hours), return them
+      if (forecasts.length > 0) {
+        const latestForecast = forecasts[0];
+        const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
         
-        return {
-          userProfileId,
-          date: new Date(date),
-          maxTemperature: weatherData.daily.temperature_2m_max[index],
-          minTemperature: weatherData.daily.temperature_2m_min[index],
-          precipitationSum: precipitation,
-          weatherCode: weatherData.daily.weather_code[index],
-          windSpeed: weatherData.daily.wind_speed_10m_max[index],
-          rainType,
-          collectableRain
-        };
-      });
+        if (latestForecast.updatedAt && new Date(latestForecast.updatedAt) > sixHoursAgo) {
+          return res.json({ forecasts });
+        }
+      }
 
-      // Store forecasts in database
-      await storage.updateWeatherForecasts(userProfileId, forecasts);
+      // Try to fetch fresh data from API if we have location
+      if (profile.latitude && profile.longitude) {
+        try {
+          const lat = parseFloat(profile.latitude);
+          const lng = parseFloat(profile.longitude);
+          
+          const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,wind_speed_10m_max&timezone=auto&forecast_days=7`;
+          
+          const response = await fetch(weatherUrl);
+          const weatherData = await response.json();
+          
+          if (response.ok && weatherData.daily) {
+            // Process and classify rain data
+            const freshForecasts = weatherData.daily.time.map((date: string, index: number) => {
+              const precipitation = weatherData.daily.precipitation_sum[index] || 0;
+              const rainType = classifyRainType(precipitation);
+              const collectableRain = precipitation > 0.5; // Minimum 0.5mm to be worth collecting
+              
+              return {
+                userProfileId,
+                date: new Date(date),
+                maxTemperature: weatherData.daily.temperature_2m_max[index],
+                minTemperature: weatherData.daily.temperature_2m_min[index],
+                precipitationSum: precipitation,
+                weatherCode: weatherData.daily.weather_code[index],
+                windSpeed: weatherData.daily.wind_speed_10m_max[index],
+                rainType,
+                collectableRain
+              };
+            });
 
+            // Store fresh forecasts in database
+            await storage.updateWeatherForecasts(userProfileId, freshForecasts);
+            forecasts = freshForecasts;
+          }
+        } catch (apiError) {
+          console.warn("API fetch failed, using cached data:", apiError);
+        }
+      }
+
+      // Return whatever forecast data we have (fresh or cached)
       res.json({ forecasts });
     } catch (error) {
       console.error("Error fetching weather:", error);
