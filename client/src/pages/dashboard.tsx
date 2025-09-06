@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -19,7 +19,15 @@ import {
   Briefcase,
   Shield,
   Sun,
-  Moon
+  Moon,
+  Bell,
+  CloudRain,
+  Cloud,
+  Thermometer,
+  Wind,
+  Calendar,
+  AlertTriangle,
+  CheckCircle
 } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -50,6 +58,32 @@ interface WeatherData {
   climateZone: string;
   nextForecast: string;
   lastRain: string;
+}
+
+interface WeatherForecast {
+  id: string;
+  userProfileId: string;
+  date: string;
+  maxTemperature: number;
+  minTemperature: number;
+  precipitationSum: number;
+  weatherCode: number;
+  windSpeed: number;
+  rainType: string;
+  collectableRain: boolean;
+}
+
+interface Notification {
+  id: string;
+  userId: string;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  emailSent: boolean;
+  rainType?: string;
+  expectedRainfall?: number;
+  createdAt: string;
 }
 
 export default function Dashboard() {
@@ -106,6 +140,35 @@ export default function Dashboard() {
     },
     enabled: isAuthenticated && !!profile?.city,
     retry: false,
+  });
+
+  // Fetch 7-day weather forecast
+  const { data: forecasts, isLoading: forecastLoading } = useQuery<{ forecasts: WeatherForecast[] }>({
+    queryKey: ["/api/weather", profile?.id],
+    queryFn: async () => {
+      const response = await fetch(`/api/weather/${profile?.id}`);
+      if (!response.ok) throw new Error('Failed to fetch weather forecast');
+      return response.json();
+    },
+    enabled: isAuthenticated && !!profile?.id,
+    retry: false,
+    refetchInterval: 3600000, // Auto-refresh every hour
+  });
+
+  // Fetch notifications
+  const { data: notifications } = useQuery<{ notifications: Notification[] }>({
+    queryKey: ["/api/notifications"],
+    enabled: isAuthenticated,
+    retry: false,
+    refetchInterval: 60000, // Auto-refresh every minute
+  });
+
+  // Fetch notification count
+  const { data: notificationCount } = useQuery<{ count: number }>({
+    queryKey: ["/api/notifications/count"],
+    enabled: isAuthenticated,
+    retry: false,
+    refetchInterval: 60000, // Auto-refresh every minute
   });
 
   // Create calculations mutation
@@ -310,6 +373,22 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-foreground">Boondh Dashboard</h1>
             </div>
             <div className="flex items-center space-x-4">
+              {/* Notification Bell */}
+              <div className="relative">
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-8 w-8"
+                  data-testid="button-notifications"
+                >
+                  <Bell className="h-4 w-4" />
+                  {notificationCount?.count && notificationCount.count > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {notificationCount.count > 9 ? '9+' : notificationCount.count}
+                    </span>
+                  )}
+                </Button>
+              </div>
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -662,6 +741,139 @@ export default function Dashboard() {
                 <h4 className="font-semibold text-foreground mb-2">Gardening</h4>
                 <p className="text-sm text-muted-foreground">{Math.round(monthlyCollection * 0.2)} L/month</p>
                 <p className="text-xs text-muted-foreground">Plant watering</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 7-Day Weather Forecast */}
+        <Card className="mb-8">
+          <CardContent className="p-8">
+            <h3 className="text-2xl font-semibold text-foreground mb-6">7-Day Weather Forecast</h3>
+            
+            {forecastLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : forecasts?.forecasts?.length ? (
+              <div className="grid grid-cols-7 gap-3">
+                {forecasts.forecasts.map((forecast, index) => {
+                  const date = new Date(forecast.date);
+                  const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                  const weatherIcon = forecast.precipitationSum > 0 ? CloudRain : Cloud;
+                  
+                  return (
+                    <div key={forecast.id} className="text-center p-4 bg-muted/30 rounded-lg">
+                      <div className="text-sm font-medium text-muted-foreground mb-2">{dayName}</div>
+                      <div className="flex justify-center mb-2">
+                        {React.createElement(weatherIcon, { className: "w-6 h-6 text-primary" })}
+                      </div>
+                      <div className="text-sm font-semibold text-foreground">
+                        {Math.round(forecast.maxTemperature)}°/{Math.round(forecast.minTemperature)}°
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {forecast.precipitationSum}mm
+                      </div>
+                      {forecast.precipitationSum > 0 && (
+                        <div className={`text-xs px-2 py-1 rounded-full mt-2 ${
+                          forecast.collectableRain ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
+                          'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                        }`}>
+                          {forecast.rainType}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No weather forecast available. Please check your location settings.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Rain Collection Recommendations */}
+        <Card className="mb-8">
+          <CardContent className="p-8">
+            <h3 className="text-2xl font-semibold text-foreground mb-6">Rain Collection Recommendations</h3>
+            
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Upcoming Rain Alerts */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-foreground">Upcoming Rain Events</h4>
+                {forecasts?.forecasts?.filter(f => f.precipitationSum > 0)?.slice(0, 3).map((forecast, index) => {
+                  const date = new Date(forecast.date);
+                  const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                  const potentialCollection = (forecast.precipitationSum * parseFloat(profile.rooftopArea || "0") * 0.85 * 0.623).toFixed(0);
+                  
+                  return (
+                    <div key={forecast.id} className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          forecast.collectableRain ? 'bg-green-100 dark:bg-green-900' : 'bg-yellow-100 dark:bg-yellow-900'
+                        }`}>
+                          {forecast.collectableRain ? (
+                            <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                          ) : (
+                            <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-foreground">{dateStr} - {forecast.rainType} rain</div>
+                          <div className="text-sm text-muted-foreground">{forecast.precipitationSum}mm expected</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-foreground">{potentialCollection}L</div>
+                        <div className="text-sm text-muted-foreground">
+                          {forecast.collectableRain ? 'Collect' : 'Too light'}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }) || (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No significant rain expected in the next 7 days
+                  </div>
+                )}
+              </div>
+
+              {/* Collection Tips */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-foreground">Collection Tips</h4>
+                <div className="space-y-3">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Thermometer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span className="font-medium text-blue-900 dark:text-blue-100">Temperature Range</span>
+                    </div>
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      {forecasts?.forecasts?.[0] ? `${Math.round(forecasts.forecasts[0].minTemperature)}° - ${Math.round(forecasts.forecasts[0].maxTemperature)}°C today` : 'Temperature data loading...'}
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Wind className="w-4 h-4 text-green-600 dark:text-green-400" />
+                      <span className="font-medium text-green-900 dark:text-green-100">Wind Conditions</span>
+                    </div>
+                    <p className="text-sm text-green-800 dark:text-green-200">
+                      {forecasts?.forecasts?.[0] ? `${Math.round(forecasts.forecasts[0].windSpeed)} km/h wind speed` : 'Wind data loading...'}
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <span className="font-medium text-purple-900 dark:text-purple-100">Best Collection Days</span>
+                    </div>
+                    <p className="text-sm text-purple-800 dark:text-purple-200">
+                      {forecasts?.forecasts?.filter(f => f.collectableRain).length || 0} out of 7 days are optimal for collection
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
