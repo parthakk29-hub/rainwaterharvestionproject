@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertUserProfileSchema, insertWaterCalculationSchema } from "@shared/schema";
+import { insertUserProfileSchema, insertWaterCalculationSchema, insertNotificationSchema } from "@shared/schema";
 import { z } from "zod";
 import * as XLSX from "xlsx";
 
@@ -337,6 +337,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating Excel report:", error);
       res.status(500).json({ message: "Failed to generate Excel report" });
+    }
+  });
+
+  // Weather forecast routes
+  app.get('/api/weather/:userProfileId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userProfileId } = req.params;
+      
+      // Get user profile to get location
+      const profile = await storage.getUserProfile(req.user.claims.sub);
+      if (!profile || profile.id !== userProfileId) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+
+      if (!profile.latitude || !profile.longitude) {
+        return res.status(400).json({ message: "Location not set in profile" });
+      }
+
+      // Fetch 7-day weather forecast from Open-Meteo API
+      const lat = parseFloat(profile.latitude);
+      const lng = parseFloat(profile.longitude);
+      
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code,wind_speed_10m_max&timezone=auto&forecast_days=7`;
+      
+      const response = await fetch(weatherUrl);
+      const weatherData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch weather data');
+      }
+
+      // Process and classify rain data
+      const forecasts = weatherData.daily.time.map((date: string, index: number) => {
+        const precipitation = weatherData.daily.precipitation_sum[index] || 0;
+        const rainType = classifyRainType(precipitation);
+        const collectableRain = precipitation > 0.5; // Minimum 0.5mm to be worth collecting
+        
+        return {
+          userProfileId,
+          date: new Date(date),
+          maxTemperature: weatherData.daily.temperature_2m_max[index],
+          minTemperature: weatherData.daily.temperature_2m_min[index],
+          precipitationSum: precipitation,
+          weatherCode: weatherData.daily.weather_code[index],
+          windSpeed: weatherData.daily.wind_speed_10m_max[index],
+          rainType,
+          collectableRain
+        };
+      });
+
+      // Store forecasts in database
+      await storage.updateWeatherForecasts(userProfileId, forecasts);
+
+      res.json({ forecasts });
+    } catch (error) {
+      console.error("Error fetching weather:", error);
+      res.status(500).json({ message: "Failed to fetch weather data" });
+    }
+  });
+
+  // Helper function to classify rain type
+  function classifyRainType(precipitation: number): string {
+    if (precipitation === 0) return 'none';
+    if (precipitation < 2.5) return 'light';
+    if (precipitation < 10) return 'moderate';
+    if (precipitation < 50) return 'heavy';
+    return 'storm';
+  }
+
+  // Notification routes
+  app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notifications = await storage.getUserNotifications(userId);
+      res.json({ notifications });
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get('/api/notifications/count', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const count = await storage.getUnreadNotificationCount(userId);
+      res.json({ count });
+    } catch (error) {
+      console.error("Error fetching notification count:", error);
+      res.status(500).json({ message: "Failed to fetch notification count" });
+    }
+  });
+
+  app.post('/api/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const notificationData = insertNotificationSchema.parse({
+        ...req.body,
+        userId,
+      });
+
+      const notification = await storage.createNotification(notificationData);
+      res.json(notification);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid notification data", errors: error.errors });
+      }
+      console.error("Error creating notification:", error);
+      res.status(500).json({ message: "Failed to create notification" });
+    }
+  });
+
+  app.patch('/api/notifications/:id/read', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const notification = await storage.markNotificationAsRead(id);
+      res.json(notification);
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
     }
   });
 
