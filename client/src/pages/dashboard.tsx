@@ -1059,9 +1059,10 @@ export default function Dashboard() {
               <div className="text-4xl">⚡</div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Efficiency Tips */}
-              <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
+            <div className="flex justify-center">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl">
+                {/* Efficiency Tips */}
+                <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
                 <div className="flex items-center space-x-2 mb-3">
                   <span className="text-2xl">💡</span>
                   <h4 className="font-semibold text-blue-800 dark:text-blue-200">Efficiency Tips</h4>
@@ -1082,8 +1083,8 @@ export default function Dashboard() {
                 </ul>
               </div>
 
-              {/* Upgrade Suggestions */}
-              <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
+                {/* Upgrade Suggestions */}
+                <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50">
                 <div className="flex items-center space-x-2 mb-3">
                   <span className="text-2xl">🔧</span>
                   <h4 className="font-semibold text-blue-800 dark:text-blue-200">Upgrades</h4>
@@ -1102,10 +1103,10 @@ export default function Dashboard() {
                     <span>Connect multiple downspouts</span>
                   </li>
                 </ul>
-              </div>
+                </div>
 
-              {/* Incentives */}
-              {showIncentives && (
+                {/* Incentives */}
+                {showIncentives && (
                 <div className="bg-white/70 dark:bg-gray-900/50 rounded-lg p-4 border border-blue-200/50 dark:border-blue-700/50 animate-in slide-in-from-top-4 duration-300">
                   <div className="flex items-center space-x-2 mb-3">
                     <span className="text-2xl">🎁</span>
@@ -1131,8 +1132,9 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Action Buttons */}
