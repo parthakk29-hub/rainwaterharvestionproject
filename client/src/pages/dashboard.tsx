@@ -591,7 +591,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Overview Cards */}
-        <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 sm:grid-cols-1 gap-6 mb-8">
 
           <Card>
             <CardContent className="p-6">
