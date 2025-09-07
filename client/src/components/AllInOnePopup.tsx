@@ -95,6 +95,19 @@ export default function AllInOnePopup() {
     retry: false,
   });
 
+  // Fetch weather alerts
+  const { data: weatherAlerts } = useQuery({
+    queryKey: ["/api/weather/alerts", (profile as any)?.id],
+    queryFn: async () => {
+      if (!(profile as any)?.id) return null;
+      const response = await apiRequest("GET", `/api/weather/alerts/${(profile as any).id}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && !!(profile as any)?.id,
+    retry: false,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
+  });
+
   // Quick update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -332,6 +345,30 @@ export default function AllInOnePopup() {
                     </div>
                   )}
 
+                  {/* Weather Alerts Section */}
+                  {weatherAlerts?.alerts && weatherAlerts.alerts.length > 0 && (
+                    <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 p-3 rounded-lg border border-red-200/50 dark:border-red-700/50">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <AlertCircle className="w-4 h-4 text-red-600" />
+                        <span className="text-sm font-medium text-red-800 dark:text-red-200">Weather Alerts</span>
+                        <Badge variant="outline" className="text-xs">{weatherAlerts.location}</Badge>
+                      </div>
+                      <div className="space-y-1 max-h-20 overflow-y-auto">
+                        {weatherAlerts.alerts.slice(0, 2).map((alert: any, index: number) => (
+                          <div key={alert.id} className="text-xs space-y-1">
+                            <div className="flex items-center space-x-2">
+                              {alert.type === 'critical' && <span className="text-red-600">🚨</span>}
+                              {alert.type === 'warning' && <span className="text-orange-600">⚠️</span>}
+                              {alert.type === 'info' && <span className="text-blue-600">ℹ️</span>}
+                              <span className="font-medium text-red-700 dark:text-red-300">{alert.title}</span>
+                            </div>
+                            <div className="text-red-600 dark:text-red-400 ml-5">{alert.message}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* System Recommendations */}
                   <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-3 rounded-lg border border-amber-200/50 dark:border-amber-700/50">
                     <div className="flex items-center space-x-2 mb-2">
@@ -430,24 +467,58 @@ export default function AllInOnePopup() {
 
                   {(forecasts as any)?.forecasts && (
                     <div className="space-y-2">
-                      <div className="text-sm font-medium">7-Day Forecast</div>
-                      <div className="space-y-1">
-                        {(forecasts as any)?.forecasts.slice(0, 4).map((forecast: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between text-xs bg-muted/30 p-2 rounded">
-                            <span>{new Date(forecast.date).toLocaleDateString()}</span>
-                            <div className="flex items-center space-x-2">
-                              {forecast.collectableRain && (
-                                <Badge variant="outline" className="text-xs">
-                                  {parseFloat(forecast.precipitationSum).toFixed(1)}mm
-                                </Badge>
-                              )}
-                              <span className="text-muted-foreground">
-                                {forecast.maxTemperature}°C
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm font-medium">7-Day Forecast</div>
+                        <Badge variant="outline" className="text-xs">
+                          {(forecasts as any).forecasts.length} days
+                        </Badge>
                       </div>
+                      <div className="space-y-1 max-h-48 overflow-y-auto">
+                        {(forecasts as any)?.forecasts.map((forecast: any, index: number) => {
+                          const date = new Date(forecast.date);
+                          const today = new Date();
+                          const isToday = date.toDateString() === today.toDateString();
+                          const isTomorrow = date.toDateString() === new Date(today.getTime() + 24*60*60*1000).toDateString();
+                          
+                          let dateLabel;
+                          if (isToday) dateLabel = 'Today';
+                          else if (isTomorrow) dateLabel = 'Tomorrow';
+                          else dateLabel = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                          
+                          return (
+                            <div key={index} className="flex items-center justify-between text-xs bg-muted/30 p-2 rounded hover:bg-muted/50 transition-colors">
+                              <div className="flex items-center space-x-2">
+                                <span className={`font-medium ${isToday ? 'text-blue-600' : ''}`}>
+                                  {dateLabel}
+                                </span>
+                                {forecast.collectableRain && (
+                                  <span className="text-green-600">💧</span>
+                                )}
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                {forecast.precipitationSum > 0 && (
+                                  <Badge variant="outline" className={`text-xs ${forecast.collectableRain ? 'border-green-500 text-green-600' : 'border-blue-500 text-blue-600'}`}>
+                                    {parseFloat(forecast.precipitationSum).toFixed(1)}mm
+                                  </Badge>
+                                )}
+                                <span className="text-muted-foreground">
+                                  {forecast.maxTemperature}°C
+                                </span>
+                                {forecast.rainType !== 'none' && (
+                                  <span className="text-xs text-blue-600 capitalize">
+                                    {forecast.rainType}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {(forecasts as any)?.forecasts.length > 0 && (
+                        <div className="text-xs text-center text-muted-foreground mt-2">
+                          💧 = Collectable rain • Updated: {new Date().toLocaleTimeString()}
+                        </div>
+                      )}
                     </div>
                   )}
                 </TabsContent>
