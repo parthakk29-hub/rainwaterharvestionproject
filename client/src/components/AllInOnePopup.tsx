@@ -271,50 +271,89 @@ export default function AllInOnePopup() {
 
               <div className={`px-4 pb-4 ${isFullscreen ? 'h-[calc(100vh-12rem)]' : 'h-[22rem]'} overflow-y-auto`}>
                 <TabsContent value="dashboard" className="space-y-3 mt-0">
+                  {/* User Profile Section */}
+                  {profile && (
+                    <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20 p-3 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center">
+                          <span className="text-white text-xs">👤</span>
+                        </div>
+                        <span className="text-sm font-semibold">Your System Status</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Location: {(profile as any)?.city || "Not set"}</span>
+                        {(profile as any)?.rooftopArea && (
+                          <Badge variant="outline">{(profile as any).rooftopArea} sq ft</Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-2">
                     {calculations && (
                       <>
-                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                          <div className="text-xl font-bold text-blue-600">
+                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
+                          <div className="text-lg font-bold text-blue-600">
                             {Math.round(parseFloat((calculations as any)?.monthlyCollection || "0"))}L
                           </div>
                           <div className="text-xs text-muted-foreground">Monthly Collection</div>
+                          <div className="text-xs text-blue-500 mt-1">💧 Water Saved</div>
                         </div>
-                        <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
-                          <div className="text-xl font-bold text-green-600">
+                        <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200/50 dark:border-green-700/50">
+                          <div className="text-lg font-bold text-green-600">
                             ₹{Math.round(parseFloat((calculations as any)?.monthlySavings || "0"))}
                           </div>
                           <div className="text-xs text-muted-foreground">Monthly Savings</div>
+                          <div className="text-xs text-green-500 mt-1">💰 Money Saved</div>
                         </div>
-                        <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
-                          <div className="text-xl font-bold text-purple-600">
-                            {parseFloat((calculations as any)?.paybackPeriod || "0").toFixed(1)} years
+                        <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg border border-purple-200/50 dark:border-purple-700/50">
+                          <div className="text-lg font-bold text-purple-600">
+                            {parseFloat((calculations as any)?.paybackPeriod || "0").toFixed(1)} yrs
                           </div>
                           <div className="text-xs text-muted-foreground">Payback Period</div>
+                          <div className="text-xs text-purple-500 mt-1">⏱️ Break Even</div>
                         </div>
-                        <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
-                          <div className="text-xl font-bold text-orange-600">
+                        <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border border-orange-200/50 dark:border-orange-700/50">
+                          <div className="text-lg font-bold text-orange-600">
                             {parseFloat((calculations as any)?.roi || "0").toFixed(1)}%
                           </div>
                           <div className="text-xs text-muted-foreground">ROI</div>
+                          <div className="text-xs text-orange-500 mt-1">📈 Return Rate</div>
                         </div>
                       </>
                     )}
                   </div>
 
+                  {/* Weather and Environmental Impact */}
                   {weatherData && (
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <div className="flex items-center justify-between">
+                    <div className="bg-gradient-to-r from-sky-50 to-blue-50 dark:from-sky-950/20 dark:to-blue-950/20 p-3 rounded-lg border border-sky-200/50 dark:border-sky-700/50">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-2">
-                          <Cloud className="w-4 h-4 text-blue-500" />
+                          <Cloud className="w-4 h-4 text-sky-500" />
                           <span className="text-sm font-medium">{(weatherData as any)?.city}</span>
                         </div>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="text-xs">
                           {(weatherData as any)?.monthlyRainfall}" rain
                         </Badge>
                       </div>
+                      <div className="text-xs text-muted-foreground">
+                        🌍 Environmental Impact: Helping reduce groundwater depletion
+                      </div>
                     </div>
                   )}
+
+                  {/* System Recommendations */}
+                  <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 p-3 rounded-lg border border-amber-200/50 dark:border-amber-700/50">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Target className="w-4 h-4 text-amber-600" />
+                      <span className="text-sm font-medium text-amber-800 dark:text-amber-200">Quick Tips</span>
+                    </div>
+                    <div className="text-xs text-amber-700 dark:text-amber-300 space-y-1">
+                      <div>• Clean gutters monthly for maximum flow</div>
+                      <div>• Install first-flush diverters for quality</div>
+                      <div>• Check system after heavy rains</div>
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-2 gap-2">
                     {quickActions.map((action) => (
@@ -323,7 +362,7 @@ export default function AllInOnePopup() {
                         variant="outline"
                         size="sm"
                         onClick={action.action}
-                        className="flex items-center space-x-2"
+                        className="flex items-center space-x-2 border-blue-200 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950/20"
                         data-testid={`button-quick-${action.id}`}
                       >
                         <action.icon className="w-4 h-4" />
