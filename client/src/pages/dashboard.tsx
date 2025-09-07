@@ -49,6 +49,7 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import type { InsertUserProfile } from "@shared/schema";
+import AllInOnePopup from "@/components/AllInOnePopup";
 
 interface UserProfile {
   id: string;
@@ -1210,6 +1211,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* All-in-One Popup */}
+      <AllInOnePopup />
     </div>
   );
 }
