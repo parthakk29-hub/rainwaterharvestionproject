@@ -35,7 +35,7 @@ export default function Location() {
   }, [isAuthenticated, isLoading, toast]);
 
   const updateLocationMutation = useMutation({
-    mutationFn: async (locationData: { location: string; city?: string; latitude?: number; longitude?: number }) => {
+    mutationFn: async (locationData: { location: string; city?: string; latitude?: string; longitude?: string }) => {
       console.log("Submitting location data:", locationData);
       const response = await apiRequest("POST", "/api/profile", locationData);
       return response.json();
@@ -105,8 +105,8 @@ export default function Location() {
           updateLocationMutation.mutate({
             location: locationStr,
             city,
-            latitude,
-            longitude,
+            latitude: latitude.toString(),
+            longitude: longitude.toString(),
           });
         } catch (error) {
           console.error("Reverse geocoding failed:", error);
@@ -117,8 +117,8 @@ export default function Location() {
           updateLocationMutation.mutate({
             location: locationStr,
             city: fallbackCity,
-            latitude,
-            longitude,
+            latitude: latitude.toString(),
+            longitude: longitude.toString(),
           });
           toast({
             title: "Location saved",
