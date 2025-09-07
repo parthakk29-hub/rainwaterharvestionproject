@@ -45,7 +45,8 @@ import {
   TrendingUp,
   Gauge,
   Target,
-  Activity
+  Activity,
+  Info
 } from "lucide-react";
 import { useLocation } from "wouter";
 import type { InsertUserProfile } from "@shared/schema";
@@ -246,6 +247,19 @@ export default function Dashboard() {
     enabled: isAuthenticated,
     retry: false,
     refetchInterval: 60000, // Auto-refresh every minute
+  });
+
+  // Fetch weather alerts for the alerts column
+  const { data: weatherAlerts } = useQuery({
+    queryKey: ["/api/weather/alerts", (profile as any)?.id],
+    queryFn: async () => {
+      if (!(profile as any)?.id) return null;
+      const response = await apiRequest("GET", `/api/weather/alerts/${(profile as any).id}`);
+      return response.json();
+    },
+    enabled: isAuthenticated && !!(profile as any)?.id,
+    retry: false,
+    refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 
   // Create calculations mutation
@@ -577,7 +591,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Overview Cards */}
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-6 mb-8">
 
           <Card>
             <CardContent className="p-6">
@@ -634,6 +648,51 @@ export default function Dashboard() {
                 ₹{costRequiredRwh > 0 ? (costRequiredRwh / 1000).toFixed(0) : (rooftopArea * 2.5 / 1000).toFixed(0)}k
               </div>
               <p className="text-sm text-muted-foreground">RWH system investment</p>
+            </CardContent>
+          </Card>
+
+          {/* Weather Alerts Card */}
+          <Card className={weatherAlerts?.alerts?.length > 0 ? "border-orange-200 dark:border-orange-800" : ""}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-foreground">Weather Alerts</h3>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  weatherAlerts?.alerts?.length > 0 
+                    ? "bg-orange-100 dark:bg-orange-900/20" 
+                    : "bg-green-100 dark:bg-green-900/20"
+                }`}>
+                  {weatherAlerts?.alerts?.length > 0 ? (
+                    <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  ) : (
+                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  )}
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-foreground mb-1" data-testid="text-weather-alerts">
+                {weatherAlerts?.alerts?.length || 0}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {weatherAlerts?.alerts?.length > 0 ? `Active warnings for ${(profile as any)?.city || "your area"}` : "All clear for collection"}
+              </p>
+              
+              {/* Show recent alerts */}
+              {weatherAlerts?.alerts?.length > 0 && (
+                <div className="mt-4 space-y-2 max-h-20 overflow-y-auto">
+                  {weatherAlerts.alerts.slice(0, 2).map((alert: any, index: number) => (
+                    <div key={alert.id || index} className="flex items-start space-x-2 p-2 bg-orange-50 dark:bg-orange-900/10 rounded text-xs">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {alert.type === 'critical' && <span className="text-red-600">🚨</span>}
+                        {alert.type === 'warning' && <span className="text-orange-600">⚠️</span>}
+                        {alert.type === 'info' && <span className="text-blue-600">ℹ️</span>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-orange-800 dark:text-orange-200 truncate">{alert.title}</div>
+                        <div className="text-orange-600 dark:text-orange-400 truncate">{alert.message}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
