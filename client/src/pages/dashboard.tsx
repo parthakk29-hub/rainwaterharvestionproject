@@ -651,48 +651,196 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Weather Alerts Card */}
-          <Card className={weatherAlerts?.alerts?.length > 0 ? "border-orange-200 dark:border-orange-800" : ""}>
+          {/* Enhanced Weather Alerts Card */}
+          <Card className={weatherAlerts?.alerts?.length > 0 ? "border-orange-200 dark:border-orange-800 shadow-lg" : "border-green-200 dark:border-green-800"}>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground">Weather Alerts</h3>
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                <div className="flex items-center space-x-3">
+                  <h3 className="font-semibold text-foreground">Weather Alerts</h3>
+                  {weatherAlerts?.lastUpdated && (
+                    <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                      Updated {new Date(weatherAlerts.lastUpdated).toLocaleTimeString()}
+                    </span>
+                  )}
+                </div>
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm ${
                   weatherAlerts?.alerts?.length > 0 
-                    ? "bg-orange-100 dark:bg-orange-900/20" 
-                    : "bg-green-100 dark:bg-green-900/20"
+                    ? "bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 animate-pulse" 
+                    : "bg-gradient-to-br from-green-100 to-blue-100 dark:from-green-900/30 dark:to-blue-900/30"
                 }`}>
                   {weatherAlerts?.alerts?.length > 0 ? (
-                    <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                    <AlertTriangle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                   ) : (
-                    <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
                   )}
                 </div>
               </div>
-              <div className="text-2xl font-bold text-foreground mb-1" data-testid="text-weather-alerts">
-                {weatherAlerts?.alerts?.length || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {weatherAlerts?.alerts?.length > 0 ? `Active warnings for ${(profile as any)?.city || "your area"}` : "All clear for collection"}
-              </p>
               
-              {/* Show recent alerts */}
-              {weatherAlerts?.alerts?.length > 0 && (
-                <div className="mt-4 space-y-2 max-h-20 overflow-y-auto">
-                  {weatherAlerts.alerts.slice(0, 2).map((alert: any, index: number) => (
-                    <div key={alert.id || index} className="flex items-start space-x-2 p-2 bg-orange-50 dark:bg-orange-900/10 rounded text-xs">
-                      <div className="flex-shrink-0 mt-0.5">
-                        {alert.type === 'critical' && <span className="text-red-600">🚨</span>}
-                        {alert.type === 'warning' && <span className="text-orange-600">⚠️</span>}
-                        {alert.type === 'info' && <span className="text-blue-600">ℹ️</span>}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-3xl font-bold text-foreground mb-1" data-testid="text-weather-alerts">
+                    {weatherAlerts?.alerts?.length || 0}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {weatherAlerts?.alerts?.length > 0 ? `Active alerts for ${(profile as any)?.city || "your area"}` : "Perfect conditions for collection"}
+                  </p>
+                </div>
+                
+                {/* Alert Severity Breakdown */}
+                {weatherAlerts?.alerts?.length > 0 && (
+                  <div className="flex flex-col space-y-1 text-right">
+                    {weatherAlerts.alerts.filter((a: any) => a.type === 'critical').length > 0 && (
+                      <div className="flex items-center space-x-1 text-xs">
+                        <span className="text-red-600">🚨</span>
+                        <span className="text-red-700 dark:text-red-300 font-medium">
+                          {weatherAlerts.alerts.filter((a: any) => a.type === 'critical').length} Critical
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-orange-800 dark:text-orange-200 truncate">{alert.title}</div>
-                        <div className="text-orange-600 dark:text-orange-400 truncate">{alert.message}</div>
+                    )}
+                    {weatherAlerts.alerts.filter((a: any) => a.type === 'warning').length > 0 && (
+                      <div className="flex items-center space-x-1 text-xs">
+                        <span className="text-orange-600">⚠️</span>
+                        <span className="text-orange-700 dark:text-orange-300 font-medium">
+                          {weatherAlerts.alerts.filter((a: any) => a.type === 'warning').length} Warning
+                        </span>
                       </div>
+                    )}
+                    {weatherAlerts.alerts.filter((a: any) => a.type === 'info').length > 0 && (
+                      <div className="flex items-center space-x-1 text-xs">
+                        <span className="text-blue-600">ℹ️</span>
+                        <span className="text-blue-700 dark:text-blue-300 font-medium">
+                          {weatherAlerts.alerts.filter((a: any) => a.type === 'info').length} Advisory
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Detailed Alert Display */}
+              {weatherAlerts?.alerts?.length > 0 ? (
+                <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                  {weatherAlerts.alerts.slice(0, 5).map((alert: any, index: number) => {
+                    const alertTime = alert.timestamp ? new Date(alert.timestamp).toLocaleString() : 'Recent';
+                    const isExpired = alert.expires && new Date(alert.expires) < new Date();
+                    
+                    return (
+                      <div key={alert.id || index} className={`p-4 rounded-lg border transition-all hover:shadow-md ${
+                        alert.type === 'critical' ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800' :
+                        alert.type === 'warning' ? 'bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800' :
+                        'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'
+                      } ${isExpired ? 'opacity-60' : ''}`}>
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex-shrink-0">
+                              {alert.type === 'critical' && <span className="text-red-600 text-lg">🚨</span>}
+                              {alert.type === 'warning' && <span className="text-orange-600 text-lg">⚠️</span>}
+                              {alert.type === 'info' && <span className="text-blue-600 text-lg">ℹ️</span>}
+                            </div>
+                            <div>
+                              <h4 className={`font-semibold text-sm ${
+                                alert.type === 'critical' ? 'text-red-800 dark:text-red-200' :
+                                alert.type === 'warning' ? 'text-orange-800 dark:text-orange-200' :
+                                'text-blue-800 dark:text-blue-200'
+                              }`}>{alert.title}</h4>
+                              <p className="text-xs text-muted-foreground">{alertTime}</p>
+                            </div>
+                          </div>
+                          
+                          {alert.expires && !isExpired && (
+                            <div className="text-xs bg-muted px-2 py-1 rounded">
+                              Expires {new Date(alert.expires).toLocaleDateString()}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <p className={`text-sm leading-relaxed ${
+                          alert.type === 'critical' ? 'text-red-700 dark:text-red-300' :
+                          alert.type === 'warning' ? 'text-orange-700 dark:text-orange-300' :
+                          'text-blue-700 dark:text-blue-300'
+                        }`}>{alert.message}</p>
+                        
+                        {/* Additional alert details */}
+                        {alert.details && (
+                          <div className="mt-3 p-3 rounded bg-background/50 dark:bg-foreground/5">
+                            <h5 className="text-xs font-medium text-muted-foreground mb-1">Additional Details:</h5>
+                            <p className="text-xs text-muted-foreground">{alert.details}</p>
+                          </div>
+                        )}
+                        
+                        {/* Impact on water collection */}
+                        {alert.collectionImpact && (
+                          <div className="mt-2 flex items-center space-x-2">
+                            <Droplets className="w-4 h-4 text-blue-500" />
+                            <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                              Impact: {alert.collectionImpact}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {/* Recommended actions */}
+                        {alert.recommendations && alert.recommendations.length > 0 && (
+                          <div className="mt-3">
+                            <h5 className="text-xs font-medium text-muted-foreground mb-1">Recommendations:</h5>
+                            <ul className="text-xs space-y-1">
+                              {alert.recommendations.slice(0, 3).map((rec: string, i: number) => (
+                                <li key={i} className="flex items-start space-x-1">
+                                  <span className="text-muted-foreground mt-0.5">•</span>
+                                  <span className="text-muted-foreground">{rec}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  
+                  {weatherAlerts.alerts.length > 5 && (
+                    <div className="text-center py-2">
+                      <Button variant="outline" size="sm" className="text-xs">
+                        View {weatherAlerts.alerts.length - 5} more alerts
+                      </Button>
                     </div>
-                  ))}
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-3" />
+                  <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">Optimal Conditions</h4>
+                  <p className="text-sm text-green-700 dark:text-green-300 mb-4">Perfect weather for rainwater collection!</p>
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded">
+                      <div className="font-semibold text-green-800 dark:text-green-200">Next Rain</div>
+                      <div className="text-green-600 dark:text-green-400">{weather?.nextForecast || 'Unknown'}</div>
+                    </div>
+                    <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded">
+                      <div className="font-semibold text-green-800 dark:text-green-200">Last Rain</div>
+                      <div className="text-green-600 dark:text-green-400">{weather?.lastRain || 'Unknown'}</div>
+                    </div>
+                  </div>
                 </div>
               )}
+              
+              {/* Quick Actions */}
+              <div className="mt-4 flex justify-between items-center pt-4 border-t border-border">
+                <div className="text-xs text-muted-foreground flex items-center space-x-1">
+                  <Eye className="w-3 h-3" />
+                  <span>Auto-refresh every 5 minutes</span>
+                </div>
+                <div className="flex space-x-2">
+                  {weatherAlerts?.alerts?.length > 0 && (
+                    <Button variant="outline" size="sm" className="text-xs h-7">
+                      <Bell className="w-3 h-3 mr-1" />
+                      Notify Me
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" className="text-xs h-7">
+                    <CloudRain className="w-3 h-3 mr-1" />
+                    View Forecast
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
