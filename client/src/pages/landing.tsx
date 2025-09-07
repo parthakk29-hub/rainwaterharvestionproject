@@ -1,11 +1,41 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Droplets, DollarSign, Shield, Settings, Briefcase, BarChart3, Moon, Sun } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Droplets, DollarSign, Shield, Settings, Briefcase, BarChart3, Moon, Sun, HelpCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Link } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
 
 export default function Landing() {
   const { theme, toggleTheme } = useTheme();
+  const [faqOpen, setFaqOpen] = useState(false);
+  
+  const rainwaterFAQs = [
+    {
+      question: "How much water can I collect from my roof?",
+      answer: "A 1000 sq ft roof can collect approximately 600-800 liters from 1 inch of rainfall. Annual collection varies by location but typically ranges from 8,000-25,000 liters."
+    },
+    {
+      question: "What is the cost of installing a rainwater harvesting system?",
+      answer: "Basic systems start from ₹15,000-₹30,000 for residential properties. Government subsidies can reduce costs by 30-50%. ROI is typically achieved in 2-4 years."
+    },
+    {
+      question: "Is rainwater safe to drink?",
+      answer: "With proper filtration and treatment, rainwater can be safe for drinking. However, it's commonly used for gardening, washing, and toilet flushing to reduce municipal water dependency."
+    },
+    {
+      question: "What roof types work best for collection?",
+      answer: "Metal roofs (95% efficiency), concrete (90%), and clay tiles (80%) work well. Avoid lead-based paints or asbestos roofs. Clean, smooth surfaces collect more water."
+    },
+    {
+      question: "How do I maintain my system?",
+      answer: "Clean gutters quarterly, inspect filters monthly, and service pumps annually. Check for leaks after heavy rains. Professional inspection recommended yearly."
+    },
+    {
+      question: "Do I need permission to install?",
+      answer: "Most residential systems don't require permits. Check local regulations. Many states offer incentives and tax benefits for rainwater harvesting installations."
+    }
+  ];
   
   return (
     <div className="min-h-screen bg-background">
@@ -210,6 +240,84 @@ export default function Landing() {
           </Link>
         </div>
       </section>
+
+      {/* FAQ Popup - Bottom Left */}
+      <div className="fixed bottom-4 left-4 z-50">
+        <Dialog open={faqOpen} onOpenChange={setFaqOpen}>
+          <DialogTrigger asChild>
+            <Button 
+              className="w-14 h-14 rounded-full shadow-lg bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white border-2 border-white"
+              data-testid="button-faq-toggle"
+            >
+              <HelpCircle className="w-6 h-6" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <Droplets className="w-5 h-5 text-blue-500" />
+                <span>Rainwater Harvesting FAQ</span>
+              </DialogTitle>
+              <DialogDescription>
+                Common questions about rainwater harvesting systems and implementation
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 mt-4">
+              {rainwaterFAQs.map((faq, index) => (
+                <FAQItem key={index} question={faq.question} answer={faq.answer} />
+              ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20 rounded-lg">
+              <div className="flex items-center space-x-2 mb-2">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span className="font-medium text-sm">Expert Tip</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Start with a simple system for non-potable uses. You can always expand later. 
+                Calculate your roof area and local rainfall to estimate potential collection.
+              </p>
+            </div>
+            
+            <div className="text-center mt-4">
+              <Link href="/registration">
+                <Button onClick={() => setFaqOpen(false)}>
+                  <Droplets className="w-4 h-4 mr-2" />
+                  Start Your Water Journey
+                </Button>
+              </Link>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}
+
+// FAQ Item Component
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  return (
+    <div className="border border-border rounded-lg">
+      <button
+        className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-muted/50 transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
+        data-testid={`faq-question-${question.slice(0, 10)}`}
+      >
+        <span className="font-medium text-sm pr-4">{question}</span>
+        {isOpen ? (
+          <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="px-4 pb-3">
+          <p className="text-sm text-muted-foreground leading-relaxed">{answer}</p>
+        </div>
+      )}
     </div>
   );
 }
