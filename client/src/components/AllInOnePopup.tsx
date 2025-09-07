@@ -49,6 +49,18 @@ export default function AllInOnePopup() {
   const [rooftopArea, setRooftopArea] = useState("");
   const [rooftopType, setRooftopType] = useState("concrete");
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Auto-close popup after 2 seconds when expanded
+  useEffect(() => {
+    if (isExpanded) {
+      const timer = setTimeout(() => {
+        setIsExpanded(false);
+        setIsFullscreen(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
   const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
 
