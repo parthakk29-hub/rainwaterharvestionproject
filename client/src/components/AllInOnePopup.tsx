@@ -27,7 +27,6 @@ import {
   ChevronUp,
   ChevronDown,
   BarChart3,
-  Smartphone,
   Users,
   Shield,
   Zap,
@@ -216,16 +215,9 @@ export default function AllInOnePopup() {
                   size="sm"
                   onClick={() => setIsFullscreen(!isFullscreen)}
                   data-testid="button-fullscreen-popup"
+                  className="hover:bg-muted/50"
                 >
-                  <Maximize2 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsExpanded(false)}
-                  data-testid="button-minimize-popup"
-                >
-                  <Minimize2 className="w-4 h-4" />
+                  {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </Button>
                 <Button
                   variant="ghost"
@@ -251,7 +243,7 @@ export default function AllInOnePopup() {
 
           <CardContent className="p-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
-              <TabsList className="grid w-full grid-cols-6 mx-4 mb-2">
+              <TabsList className="grid w-full grid-cols-5 mx-4 mb-2">
                 <TabsTrigger value="dashboard" className="text-xs">
                   <Home className="w-3 h-3" />
                 </TabsTrigger>
@@ -263,9 +255,6 @@ export default function AllInOnePopup() {
                 </TabsTrigger>
                 <TabsTrigger value="analytics" className="text-xs">
                   <BarChart3 className="w-3 h-3" />
-                </TabsTrigger>
-                <TabsTrigger value="mobile" className="text-xs">
-                  <Smartphone className="w-3 h-3" />
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="text-xs">
                   <Settings className="w-3 h-3" />
@@ -618,74 +607,6 @@ export default function AllInOnePopup() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="mobile" className="space-y-4 mt-0">
-                  <div className="space-y-4">
-                    <div className="text-sm font-medium flex items-center space-x-2">
-                      <Smartphone className="w-4 h-4" />
-                      <span>Mobile App Features</span>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 p-3 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">React Native App</div>
-                            <div className="text-xs text-muted-foreground">Mobile-optimized experience</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-3 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                            <Bell className="w-4 h-4 text-blue-600" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">Rain Notifications</div>
-                            <div className="text-xs text-muted-foreground">Real-time alerts for collection</div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 p-3 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                            <Eye className="w-4 h-4 text-purple-600" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">Offline Access</div>
-                            <div className="text-xs text-muted-foreground">Works without internet</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div className="text-center space-y-2">
-                      <div className="text-sm text-muted-foreground">
-                        Mobile app runs in parallel with web version
-                      </div>
-                      <Button
-                        size="sm"
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                        onClick={() => {
-                          toast({ 
-                            title: "Mobile App Ready!", 
-                            description: "React Native mobile app is available in the mobile/ directory" 
-                          });
-                        }}
-                        data-testid="button-mobile-app"
-                      >
-                        <Smartphone className="w-4 h-4 mr-2" />
-                        Launch Mobile Experience
-                      </Button>
-                    </div>
-                  </div>
-                </TabsContent>
 
                 <TabsContent value="settings" className="space-y-4 mt-0">
                   <div className="space-y-4">
@@ -783,7 +704,7 @@ export default function AllInOnePopup() {
                           variant="outline"
                           onClick={() => {
                             const notificationData = {
-                              userId: user?.id,
+                              userId: user?.sub || 'anonymous',
                               type: "system_update",
                               title: "System Check Complete",
                               message: `Water collection system is functioning optimally. Current monthly collection: ${Math.round(parseFloat((calculations as any)?.monthlyCollection || "0"))}L`
@@ -824,13 +745,6 @@ export default function AllInOnePopup() {
                           <Badge className="bg-green-100 text-green-800">Active</Badge>
                         </div>
                         
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="flex items-center space-x-2">
-                            <CheckCircle className="w-3 h-3 text-green-500" />
-                            <span>Mobile App</span>
-                          </span>
-                          <Badge className="bg-blue-100 text-blue-800">Ready</Badge>
-                        </div>
                       </div>
                     </div>
 
