@@ -229,16 +229,16 @@ export default function AllInOnePopup() {
                 </Button>
               </div>
             </div>
-            {profile && (
+            {profile ? (
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <span>{(profile as any)?.city || "Location not set"}</span>
-                {calculations && (
+                {calculations ? (
                   <Badge variant="outline">
                     {Math.round(parseFloat((calculations as any)?.monthlyCollection || "0"))}L/month
                   </Badge>
-                )}
+                ) : null}
               </div>
-            )}
+            ) : null}
           </CardHeader>
 
           <CardContent className="p-0">
@@ -264,7 +264,7 @@ export default function AllInOnePopup() {
               <div className={`px-4 pb-4 ${isFullscreen ? 'h-[calc(100vh-12rem)]' : 'h-[22rem]'} overflow-y-auto`}>
                 <TabsContent value="dashboard" className="space-y-3 mt-0">
                   {/* User Profile Section */}
-                  {profile && (
+                  {profile ? (
                     <div className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950/20 dark:to-green-950/20 p-3 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
                       <div className="flex items-center space-x-2 mb-2">
                         <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-green-500 flex items-center justify-center">
@@ -279,10 +279,10 @@ export default function AllInOnePopup() {
                         )}
                       </div>
                     </div>
-                  )}
+                  ) : null}
 
                   <div className="grid grid-cols-2 gap-2">
-                    {calculations && (
+                    {calculations ? (
                       <>
                         <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200/50 dark:border-blue-700/50">
                           <div className="text-lg font-bold text-blue-600">
@@ -313,7 +313,7 @@ export default function AllInOnePopup() {
                           <div className="text-xs text-orange-500 mt-1">📈 Return Rate</div>
                         </div>
                       </>
-                    )}
+                    ) : null}
                   </div>
 
                   {/* Weather and Environmental Impact */}
@@ -516,7 +516,7 @@ export default function AllInOnePopup() {
                   <div className="space-y-4">
                     <div className="text-sm font-medium">System Analytics</div>
                     
-                    {calculations && (
+                    {calculations ? (
                       <div className="grid grid-cols-1 gap-3">
                         <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-3 rounded-lg">
                           <div className="flex items-center justify-between">
@@ -560,7 +560,7 @@ export default function AllInOnePopup() {
                           </div>
                         </div>
                       </div>
-                    )}
+                    ) : null}
                     
                     <Separator />
                     
@@ -704,7 +704,7 @@ export default function AllInOnePopup() {
                           variant="outline"
                           onClick={() => {
                             const notificationData = {
-                              userId: user?.sub || 'anonymous',
+                              userId: (user as any)?.sub || 'anonymous',
                               type: "system_update",
                               title: "System Check Complete",
                               message: `Water collection system is functioning optimally. Current monthly collection: ${Math.round(parseFloat((calculations as any)?.monthlyCollection || "0"))}L`
