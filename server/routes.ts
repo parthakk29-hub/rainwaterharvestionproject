@@ -552,6 +552,139 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Weather alerts endpoint
+  app.get('/api/weather/alerts/:userProfileId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userProfileId } = req.params;
+      
+      // Get user profile to get location
+      const profile = await storage.getUserProfile(req.user.claims.sub);
+      if (!profile || profile.id !== userProfileId) {
+        return res.status(404).json({ message: "Profile not found" });
+      }
+
+      // Get coordinates
+      let lat, lng;
+      if (profile.latitude && profile.longitude) {
+        lat = parseFloat(profile.latitude);
+        lng = parseFloat(profile.longitude);
+      } else if (profile.city) {
+        const cityCoordinates = getCityCoordinates(profile.city);
+        if (cityCoordinates) {
+          lat = cityCoordinates.lat;
+          lng = cityCoordinates.lng;
+        }
+      }
+      
+      // Fallback to Delhi coordinates
+      if (!lat || !lng) {
+        lat = 28.7041;
+        lng = 77.1025;
+      }
+
+      // Get current weather and forecast for alert generation
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m&daily=precipitation_sum,weather_code,wind_speed_10m_max&timezone=auto&forecast_days=3`;
+      
+      const response = await fetch(weatherUrl);
+      const weatherData = await response.json();
+      
+      let alerts: Array<{
+        id: string;
+        type: 'warning' | 'info' | 'critical';
+        title: string;
+        message: string;
+        timestamp: string;
+      }> = [];
+
+      if (response.ok && weatherData) {
+        const current = weatherData.current;
+        const daily = weatherData.daily;
+        
+        // Check for current weather alerts
+        if (current.wind_speed_10m > 25) {
+          alerts.push({
+            id: 'high-wind',
+            type: 'warning',
+            title: 'High Wind Warning',
+            message: `Strong winds detected (${Math.round(current.wind_speed_10m)} km/h). Check and secure your rainwater collection system.`,
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        if (current.precipitation > 10) {
+          alerts.push({
+            id: 'heavy-rain',
+            type: 'info',
+            title: 'Heavy Rain Detected',
+            message: `Heavy rainfall in progress (${current.precipitation}mm). Excellent collection opportunity!`,
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        // Check forecast for upcoming alerts
+        if (daily && daily.precipitation_sum) {
+          for (let i = 0; i < Math.min(daily.precipitation_sum.length, 3); i++) {
+            const dayPrecip = daily.precipitation_sum[i];
+            const date = new Date(daily.time[i]);
+            
+            if (dayPrecip > 15) {
+              const dayName = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : date.toLocaleDateString();
+              alerts.push({
+                id: `heavy-rain-${i}`,
+                type: 'info',
+                title: 'Heavy Rain Expected',
+                message: `${dayName}: Expected ${Math.round(dayPrecip)}mm of rain. Prepare your collection system!`,
+                timestamp: new Date().toISOString()
+              });
+            }
+          }
+        }
+        
+        // System maintenance alerts based on season/weather
+        const now = new Date();
+        const month = now.getMonth();
+        
+        // Monsoon preparation (May-June in India)
+        if (month >= 4 && month <= 5) {
+          alerts.push({
+            id: 'monsoon-prep',
+            type: 'warning',
+            title: 'Monsoon Preparation',
+            message: 'Monsoon season approaching. Clean gutters, check filters, and inspect your collection system.',
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        // Winter maintenance (November-January)
+        if (month >= 10 || month <= 1) {
+          alerts.push({
+            id: 'winter-maintenance',
+            type: 'info',
+            title: 'Winter Maintenance',
+            message: 'Protect pipes from freezing. Check for debris accumulation and system efficiency.',
+            timestamp: new Date().toISOString()
+          });
+        }
+      }
+      
+      // If no specific alerts, add a general status
+      if (alerts.length === 0) {
+        alerts.push({
+          id: 'system-ok',
+          type: 'info',
+          title: 'System Status: Normal',
+          message: 'No immediate weather alerts. Your rainwater harvesting system is operating normally.',
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      res.json({ alerts, location: profile.city || 'Unknown' });
+    } catch (error) {
+      console.error("Error fetching weather alerts:", error);
+      res.status(500).json({ message: "Failed to fetch weather alerts" });
+    }
+  });
+
   // Helper function to get coordinates for major cities
   function getCityCoordinates(city: string): { lat: number; lng: number } | null {
     const cityMap: { [key: string]: { lat: number; lng: number } } = {
