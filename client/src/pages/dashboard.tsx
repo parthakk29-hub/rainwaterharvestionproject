@@ -1069,15 +1069,15 @@ export default function Dashboard() {
                   <h4 className="font-semibold text-blue-800 dark:text-blue-200">Efficiency Tips</h4>
                 </div>
                 <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
-                  <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Efficiency Tip", description: "Clean gutters monthly for maximum water flow and collection efficiency." })}>
+                  <li className="flex items-start space-x-2 p-2 rounded">
                     <span className="text-blue-500">•</span>
                     <span>Clean gutters monthly for maximum flow</span>
                   </li>
-                  <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Efficiency Tip", description: "First-flush diverters improve water quality by removing initial contaminated water." })}>
+                  <li className="flex items-start space-x-2 p-2 rounded">
                     <span className="text-blue-500">•</span>
                     <span>Install first-flush diverters for better quality</span>
                   </li>
-                  <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Efficiency Tip", description: "Mesh filters prevent debris from entering your storage tanks." })}>
+                  <li className="flex items-start space-x-2 p-2 rounded">
                     <span className="text-blue-500">•</span>
                     <span>Use mesh filters to prevent debris</span>
                   </li>
@@ -1091,15 +1091,15 @@ export default function Dashboard() {
                   <h4 className="font-semibold text-blue-800 dark:text-blue-200">Upgrades</h4>
                 </div>
                 <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
-                  <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Upgrade Option", description: "Larger storage tanks can increase your water collection capacity by 30%." })}>
+                  <li className="flex items-start space-x-2 p-2 rounded">
                     <span className="text-blue-500">•</span>
                     <span>Add larger storage tanks (+30% capacity)</span>
                   </li>
-                  <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Upgrade Option", description: "Pump systems provide better water pressure throughout your home." })}>
+                  <li className="flex items-start space-x-2 p-2 rounded">
                     <span className="text-blue-500">•</span>
                     <span>Install pump systems for higher pressure</span>
                   </li>
-                  <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Upgrade Option", description: "Multiple downspouts collect water from different roof sections." })}>
+                  <li className="flex items-start space-x-2 p-2 rounded">
                     <span className="text-blue-500">•</span>
                     <span>Connect multiple downspouts</span>
                   </li>
@@ -1113,15 +1113,15 @@ export default function Dashboard() {
                     <h4 className="font-semibold text-blue-800 dark:text-blue-200">Incentives</h4>
                   </div>
                   <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
-                    <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Government Incentive", description: "Apply for government subsidies up to ₹15,000 for rainwater harvesting systems." })}>
+                    <li className="flex items-start space-x-2 p-2 rounded">
                       <span className="text-blue-500">•</span>
                       <span>Government Subsidy - ₹15,000 Available</span>
                     </li>
-                    <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Tax Benefits", description: "Get 20% tax deduction on rainwater harvesting system installation costs." })}>
+                    <li className="flex items-start space-x-2 p-2 rounded">
                       <span className="text-blue-500">•</span>
                       <span>Tax Benefits - 20% Deduction</span>
                     </li>
-                    <li className="flex items-start space-x-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 p-2 rounded cursor-pointer transition-colors" onClick={() => toast({ title: "Water Board Rebate", description: "Receive ₹5,000 cashback from your local water board for sustainable practices." })}>
+                    <li className="flex items-start space-x-2 p-2 rounded">
                       <span className="text-blue-500">•</span>
                       <span>Water Board Rebate - ₹5,000 Cashback</span>
                     </li>
