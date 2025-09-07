@@ -75,7 +75,7 @@ export const waterCalculations = pgTable("water_calculations", {
   capacityExpansionCost: decimal("capacity_expansion_cost", { precision: 10, scale: 2 }), // in rupees
   efficiencyImprovementCost: decimal("efficiency_improvement_cost", { precision: 10, scale: 2 }), // in rupees
   paybackPeriod: decimal("payback_period", { precision: 4, scale: 1 }), // in years
-  roi: decimal("roi", { precision: 5, scale: 2 }), // return on investment percentage
+  roi: decimal("roi", { precision: 8, scale: 2 }), // return on investment percentage
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
