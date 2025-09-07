@@ -191,103 +191,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Weather/rainfall data endpoint with OpenWeatherMap API integration
+  // Weather/rainfall data endpoint using Open-Meteo API (free, no API key required)
   app.get('/api/weather/:city', isAuthenticated, async (req: any, res) => {
     try {
       const { city } = req.params;
       const { lat, lon } = req.query;
       
-      // Check if we have API key
-      if (!process.env.OPENWEATHER_API_KEY) {
-        // Fallback to mock data if no API key
-        const rainfallData = {
-          city,
-          monthlyRainfall: 2.5,
-          annualRainfall: 30,
-          climateZone: "Temperate",
-          nextForecast: "3 days",
-          lastRain: "2 days ago"
-        };
-        return res.json(rainfallData);
-      }
-
-      // Use coordinates if provided, otherwise geocode city name
-      let weatherData;
+      // Get coordinates - use provided lat/lon or get from city
+      let latitude, longitude;
       if (lat && lon) {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}&units=imperial`
-        );
-        weatherData = await response.json();
+        latitude = parseFloat(lat as string);
+        longitude = parseFloat(lon as string);
       } else {
-        const response = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=imperial`
-        );
-        weatherData = await response.json();
-      }
-      
-      // Check if API returned valid data
-      if (!weatherData || !weatherData.main || weatherData.cod !== 200) {
-        console.warn(`Weather API failed for city: ${city}, error: ${weatherData?.message || 'Unknown error'}`);
-        
-        // Try with a few common Indian cities as fallback
-        const fallbackCities = ['Delhi', 'Mumbai', 'Bangalore', 'Chennai', 'Kolkata'];
-        let fallbackData = null;
-        
-        for (const fallbackCity of fallbackCities) {
+        // Get coordinates from city
+        const cityCoords = getCityCoordinates(city);
+        if (cityCoords) {
+          latitude = cityCoords.lat;
+          longitude = cityCoords.lng;
+        } else {
+          // Use geocoding API for unknown cities
           try {
-            const fallbackResponse = await fetch(
-              `https://api.openweathermap.org/data/2.5/weather?q=${fallbackCity}&appid=${process.env.OPENWEATHER_API_KEY}&units=imperial`
+            const geocodeResponse = await fetch(
+              `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`
             );
-            fallbackData = await fallbackResponse.json();
-            if (fallbackData && fallbackData.main && fallbackData.cod === 200) {
-              console.log(`Using fallback city: ${fallbackCity} for ${city}`);
-              weatherData = fallbackData;
-              break;
+            const geocodeData = await geocodeResponse.json();
+            if (geocodeData.results && geocodeData.results.length > 0) {
+              latitude = geocodeData.results[0].latitude;
+              longitude = geocodeData.results[0].longitude;
             }
-          } catch (fallbackError) {
-            console.warn(`Fallback city ${fallbackCity} also failed:`, fallbackError);
+          } catch (geocodeError) {
+            console.warn('Geocoding failed for city:', city, geocodeError);
           }
         }
-        
-        if (!fallbackData || !weatherData.main) {
-          throw new Error(`Invalid weather API response: city not found`);
+      }
+      
+      // Fallback to Delhi coordinates if no location found
+      if (!latitude || !longitude) {
+        latitude = 28.7041;
+        longitude = 77.1025;
+        console.log(`Using fallback coordinates (Delhi) for city: ${city}`);
+      }
+      
+      // Fetch current weather and historical precipitation data
+      const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,cloud_cover&daily=precipitation_sum&past_days=30&forecast_days=1&timezone=auto`;
+      
+      console.log(`Fetching weather data from: ${weatherUrl}`);
+      const response = await fetch(weatherUrl);
+      const weatherData = await response.json();
+      
+      if (!response.ok || !weatherData.current) {
+        throw new Error(`Weather API response error: ${response.status}`);
+      }
+      
+      // Calculate monthly rainfall from historical data
+      const pastPrecipitation = weatherData.daily?.precipitation_sum || [];
+      const totalPastPrecipitation = pastPrecipitation.reduce((sum: number, val: number) => sum + (val || 0), 0);
+      const avgDailyPrecipitation = totalPastPrecipitation / pastPrecipitation.length;
+      const monthlyRainfall = (avgDailyPrecipitation * 30.44) / 25.4; // Convert mm to inches and scale to month
+      
+      // Get current conditions
+      const current = weatherData.current;
+      const currentTemp = Math.round((current.temperature_2m * 9/5) + 32); // Convert C to F
+      const humidity = current.relative_humidity_2m;
+      const currentPrecipitation = current.precipitation || 0;
+      
+      // Determine weather description from weather code
+      const weatherDescription = getWeatherDescription(current.weather_code);
+      
+      // Determine next rain forecast
+      const nextRainForecast = currentPrecipitation > 0 ? "Currently raining" : 
+                             avgDailyPrecipitation > 2 ? "2-3 days" : "5-7 days";
+      
+      // Determine last rain
+      let lastRainDay = "Unknown";
+      for (let i = pastPrecipitation.length - 1; i >= 0; i--) {
+        if (pastPrecipitation[i] > 0.5) { // At least 0.5mm
+          const daysAgo = pastPrecipitation.length - 1 - i;
+          lastRainDay = daysAgo === 0 ? "Today" : daysAgo === 1 ? "Yesterday" : `${daysAgo} days ago`;
+          break;
         }
       }
       
-      // Get historical/statistical data (this would require a paid plan for real historical data)
-      // For now, we'll use current conditions and estimate monthly/annual
-      const currentRain = weatherData.rain?.['1h'] || 0; // mm/h
-      const humidity = weatherData.main.humidity;
-      const cloudiness = weatherData.clouds?.all || 0;
-      
-      // Estimate monthly rainfall based on current conditions and humidity
-      // This is a simplified calculation - real implementation would use historical data
-      const estimatedMonthlyRainfall = Math.max(0.5, (humidity / 100) * (cloudiness / 100) * 4 + (currentRain * 0.1));
-      
       const rainfallData = {
-        city: weatherData.name,
-        monthlyRainfall: parseFloat(estimatedMonthlyRainfall.toFixed(1)),
-        annualRainfall: parseFloat((estimatedMonthlyRainfall * 12).toFixed(1)),
-        climateZone: getClimateZone(weatherData.coord.lat),
-        nextForecast: "Available via weather API",
-        lastRain: currentRain > 0 ? "Currently raining" : "Unknown",
-        currentConditions: weatherData.weather[0].description,
-        temperature: Math.round(weatherData.main.temp),
-        humidity,
-        coordinates: weatherData.coord
+        city: city,
+        monthlyRainfall: Math.max(0.1, parseFloat(monthlyRainfall.toFixed(1))),
+        annualRainfall: parseFloat((monthlyRainfall * 12).toFixed(1)),
+        climateZone: getClimateZone(latitude),
+        nextForecast: nextRainForecast,
+        lastRain: lastRainDay,
+        currentConditions: weatherDescription,
+        temperature: currentTemp,
+        humidity: Math.round(humidity),
+        coordinates: { lat: latitude, lon: longitude },
+        cloudCover: current.cloud_cover || 0,
+        currentPrecipitation: currentPrecipitation
       };
       
+      console.log(`Weather data for ${city}:`, rainfallData);
       res.json(rainfallData);
     } catch (error) {
       console.error("Error fetching weather data:", error);
-      // Fallback to mock data on error
+      // Enhanced fallback data based on common Indian rainfall patterns
+      const monthlyRainfallFallback = getSeasonalRainfall(req.params.city);
       const rainfallData = {
         city: req.params.city,
-        monthlyRainfall: 2.5,
-        annualRainfall: 30,
-        climateZone: "Temperate",
-        nextForecast: "3 days",
-        lastRain: "2 days ago"
+        monthlyRainfall: monthlyRainfallFallback,
+        annualRainfall: monthlyRainfallFallback * 12,
+        climateZone: "Subtropical",
+        nextForecast: "3-5 days",
+        lastRain: "2 days ago",
+        currentConditions: "partly cloudy",
+        temperature: 78,
+        humidity: 65,
+        coordinates: getCityCoordinates(req.params.city) || { lat: 28.7041, lon: 77.1025 }
       };
       res.json(rainfallData);
     }
@@ -301,6 +317,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (absLat <= 50) return "Temperate";
     if (absLat <= 60) return "Continental";
     return "Polar";
+  }
+
+  // Helper function to get weather description from WMO weather code
+  function getWeatherDescription(code: number): string {
+    const weatherCodes: { [key: number]: string } = {
+      0: "clear sky",
+      1: "mainly clear",
+      2: "partly cloudy",
+      3: "overcast",
+      45: "fog",
+      48: "depositing rime fog",
+      51: "light drizzle",
+      53: "moderate drizzle",
+      55: "dense drizzle",
+      56: "light freezing drizzle",
+      57: "dense freezing drizzle",
+      61: "slight rain",
+      63: "moderate rain",
+      65: "heavy rain",
+      66: "light freezing rain",
+      67: "heavy freezing rain",
+      71: "slight snow fall",
+      73: "moderate snow fall",
+      75: "heavy snow fall",
+      77: "snow grains",
+      80: "slight rain showers",
+      81: "moderate rain showers",
+      82: "violent rain showers",
+      85: "slight snow showers",
+      86: "heavy snow showers",
+      95: "thunderstorm",
+      96: "thunderstorm with slight hail",
+      99: "thunderstorm with heavy hail"
+    };
+    return weatherCodes[code] || "unknown conditions";
+  }
+
+  // Helper function to get seasonal rainfall patterns for Indian cities
+  function getSeasonalRainfall(city: string): number {
+    const now = new Date();
+    const month = now.getMonth(); // 0-11
+    
+    // Define monsoon and dry season patterns for different regions
+    const cityPatterns: { [key: string]: { monsoon: number; dry: number } } = {
+      'Mumbai': { monsoon: 8.5, dry: 0.2 },
+      'Delhi': { monsoon: 6.2, dry: 0.8 },
+      'Bangalore': { monsoon: 4.8, dry: 0.5 },
+      'Chennai': { monsoon: 5.2, dry: 1.2 },
+      'Kolkata': { monsoon: 7.1, dry: 0.6 },
+      'Hyderabad': { monsoon: 4.5, dry: 0.3 },
+      'Pune': { monsoon: 5.8, dry: 0.4 },
+      'Ahmedabad': { monsoon: 6.8, dry: 0.1 },
+      'Jaipur': { monsoon: 4.2, dry: 0.2 },
+      'Lucknow': { monsoon: 5.5, dry: 0.7 }
+    };
+    
+    const normalizedCity = city.charAt(0).toUpperCase() + city.slice(1).toLowerCase();
+    const pattern = cityPatterns[normalizedCity] || { monsoon: 5.0, dry: 0.5 }; // Default pattern
+    
+    // Monsoon months: June (5) to September (8)
+    const isMonsoon = month >= 5 && month <= 8;
+    return isMonsoon ? pattern.monsoon : pattern.dry;
   }
 
   // Excel export endpoint
